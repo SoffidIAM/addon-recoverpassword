@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<SoffidIAMPlugin xmlns="http://www.soffid.com/schema/iam-plugin-v1">
+	<name>Soffid Remember password</name>
+	<version>${pom.version}</version>
+	<core name="Remember password common classes" resource="remember-password-common-${pom.version}.jar" />
+	<core name="Remember password core classes" resource="remember-password-core-${pom.version}.jar" />
+	<web name="Remember password web files" resource="remember-password-web-${pom.version}.war" />
+	<selfService name="Remember password selfservice files"
+		resource="remember-password-selfservice-${pom.version}.war" />
+</SoffidIAMPlugin>
