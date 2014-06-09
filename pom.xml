@@ -16,6 +16,9 @@
       <url>http://www.gnu.org/licenses/gpl.html</url>
     </license>
   </licenses>
+  <scm>
+        <connection>git@github.com:SoffidIAM/addon-recoverpassword.git</connection>
+  </scm>
   <build>
     <defaultGoal>install</defaultGoal>
     <plugins>
