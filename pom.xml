@@ -5,7 +5,7 @@
   <artifactId>root</artifactId>
   <packaging>pom</packaging>
   <name>Retrieve password addon</name>
-  <version>1.0.0</version>
+  <version>1.0.1-SNAPSHOT</version>
   <description>SOFFID IAM Retrieve password addon</description>
   <prerequisites>
     <maven>2.0.1</maven>
@@ -17,7 +17,7 @@
     </license>
   </licenses>
   <scm>
-        <connection>git@github.com:SoffidIAM/addon-recoverpassword.git</connection>
+        <connection>scm:git:ssh://git@github.com/SoffidIAM/addon-recoverpassword.git</connection>
   </scm>
   <build>
     <defaultGoal>install</defaultGoal>
