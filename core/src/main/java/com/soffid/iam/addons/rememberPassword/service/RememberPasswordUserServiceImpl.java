@@ -151,7 +151,7 @@ public class RememberPasswordUserServiceImpl extends
 		if (! verify.isValid())
 			throw new BadPasswordException(verify.getReason());
 		
-		getInternalPasswordService().storeAndForwardPassword(user,
+		getInternalPasswordService().storeAndSynchronizePassword(user,
 				passwordDomain, challenge.getPassword(), false);
 		synchronized (challenges) {
 			challenges.remove(challenge.getChallengId());
@@ -169,6 +169,13 @@ public class RememberPasswordUserServiceImpl extends
 	protected RememberPasswordChallenge handleRequestChallenge(String user,
 			String dispatcher) throws InternalErrorException, UnknownUserException {
 		RememberPasswordChallenge challenge = new RememberPasswordChallenge();
+
+		int request = getRememberPasswordService()
+				.getRememberPassConfiguration().getNumber();
+		int right = getRememberPasswordService()
+				.getRememberPassConfiguration().getRight();
+		if (request <= 0 || right <= 0)
+			throw new InternalErrorException ("This feature is disabled (questions to answer = 0)");
 
 		// Check existing user
 		if (getUsuariEntityDao().findByCodi(user) != null) {
