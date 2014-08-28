@@ -38,7 +38,7 @@
 					es.caib.seycon.ng.servei.PasswordService ps = es.caib.seycon.ng.ServiceLocator.instance().getPasswordService();
 					String dispatcher = ps.getDefaultDispatcher();
 					
-					String []pds = ps.getPolicyDescription(challenge.getUser(), dispatcher).split("\n");
+					String []pds = ps.getPolicyDescription( txt_user.getValue(), dispatcher).split("\n");
 					StringBuffer policyDescription = new StringBuffer();
 					for (String pd: pds)
 					{
@@ -109,7 +109,7 @@
 						if (ejb.responseChallenge(challenge))
 						{
 							resetPassword.setVisible(true);
-							userName.setValue(challenge.getUser());
+							userName.setValue( txt_user.getValue());
 							user_questions.setVisible (false);
 							showPolicy ();
 						} else {
@@ -159,7 +159,7 @@
 										.Labels.getLabel("changepass.CanviOK"),
 									org.zkoss.util.resource.Labels.getLabel("changepass.CanviPWD")))
 						{
-							controladorSession.autenticar(challenge.getUser(), challenge.getPassword().getPassword());
+							controladorSession.autenticar( txt_user.getValue(), challenge.getPassword().getPassword());
 							controladorSession.addCookie(Executions.getCurrent().getNativeResponse());
 							Executions.sendRedirect("/");
 						}

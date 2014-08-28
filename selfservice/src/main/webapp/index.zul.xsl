@@ -14,16 +14,18 @@
 					import com.soffid.iam.addons.rememberPassword.service.ejb.RememberPasswordServiceHome;
 					import com.soffid.iam.addons.rememberPassword.service.ejb.RememberPasswordService;
 					
-					String userCode = Executions.getCurrent().getUserPrincipal().getName();
-					
-					javax.naming.Context context = new javax.naming.InitialContext();
-					Object rememberPassHome = context.lookup(RememberPasswordServiceHome.JNDI_NAME);
-					RememberPasswordService service = rememberPassHome.create();
-					
-					if (!service.checkUserConfiguration(userCode))
+					String userCode = es.caib.seycon.ng.utils.Security.getCurrentUser();
+					if (userCode != null)
 					{
-						questions_window.setVisible(true);
-						questions_window.doHighlighted();
+						javax.naming.Context context = new javax.naming.InitialContext();
+						Object rememberPassHome = context.lookup(RememberPasswordServiceHome.JNDI_NAME);
+						RememberPasswordService service = rememberPassHome.create();
+						
+						if (!service.checkUserConfiguration(userCode))
+						{
+							questions_window.setVisible(true);
+							questions_window.doHighlighted();
+						}
 					}
 				} catch (java.lang.SecurityException e) {
 				} catch (javax.ejb.AccessLocalException e) {}
@@ -43,8 +45,8 @@
 			
 			<datamodel id="model" rootNode="remember-password"
 				src="addon/remember-password/descRememberPass.xml" />
-
 			<zscript>
+
 				<![CDATA[
 					import es.caib.zkib.datasource.*;
 					
@@ -57,7 +59,7 @@
 					
 					catch (Exception ex){}
 					
-					String userCode = Executions.getCurrent().getUserPrincipal().getName();
+					String userCode = es.caib.seycon.ng.utils.Security.getCurrentUser();
 					model.getVariables().declareVariable("userCode", userCode);
 					
 					void onNewRow(data)

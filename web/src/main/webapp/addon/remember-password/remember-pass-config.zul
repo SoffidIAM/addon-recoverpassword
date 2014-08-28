@@ -64,12 +64,71 @@
 
 	<tabbox id="panels">
 		<tabs>
+			<tab label="${c:l('rememberPass.Titol')}" width="${tabWith}" />
 			<tab label="${c:l('rememberPass.zul.DefaultQuestions')}"
 				width="${tabWith}" />
-			<tab label="${c:l('rememberPass.Titol')}" width="${tabWith}" />
 		</tabs>
 
 		<tabpanels>
+			<tabpanel id="rememberPass_config">
+				<form id="form_config" dataPath="/model:/configuration" width="100%">
+					<grid id="grid_configuration">
+						<columns>
+							<column width="15em" />
+							<column width="50em" />
+						</columns>
+						<rows>
+							<row>
+								<label sclass="label" value="${c:l('rememberPass.zul.EnableEmail')}" />
+								<checkbox bind="@allowMailRecovery" />
+							</row>
+							<row>
+								<label sclass="label" value="${c:l('rememberPass.zul.EnableQuestion')}" />
+								<checkbox bind="@allowQuestionRecovery" />
+							</row>
+							<row>
+								<label value="${c:l('rememberPass.zul.PreferredMethod')}" />
+								<zscript><![CDATA[
+									mailMethod=com.soffid.iam.addons.rememberPassword.common.RecoverMethodEnum.RECOVER_BY_MAIL;
+									questionMethod=com.soffid.iam.addons.rememberPassword.common.RecoverMethodEnum.RECOVER_BY_QUESTIONS;
+								]]></zscript>
+								<listbox id="requireQuestion" bind="@preferredMethod" mold="select">
+									<listitem value="${mailMethod}"><listcell label="${c:l('rememberPass.zul.method.mail')}"/></listitem>
+									<listitem value="${questionMethod}"><listcell label="${c:l('rememberPass.zul.method.question')}"/></listitem>
+								</listbox>
+							</row>
+							<row>
+								<label sclass="label" value="${c:l('rememberPass.zul.RequireQuestions')}" />
+								<div>
+									<zscript>	
+										<![CDATA[
+										         rr = com.soffid.iam.addons.rememberPassword.common.RequireQuestion.REQUIRED;
+										         ro = com.soffid.iam.addons.rememberPassword.common.RequireQuestion.OPTIONAL;
+										]]>
+									</zscript>
+									<listbox bind="@required" mold="select">	
+										<listitem label="${c:l('RequireQuestion.O')}" value="${ro}"></listitem>
+										<listitem label="${c:l('RequireQuestion.R')}" value="${rr}"></listitem>
+									</listbox>
+								</div>
+							</row> 
+							<row>
+								<label sclass="label" value="${c:l('rememberPass.zul.NumberOfQuestions')}" />
+								<textbox id="questions_number" width="4em" bind="@number" />
+							</row>
+							<row>
+								<label sclass="label" value="${c:l('rememberPass.zul.RightQuestions')}" />
+								<textbox id="questions_right_number" width="4em" bind="@right" />
+							</row>
+							<row>
+								<label />
+								<button label="${c:l('rememberPass.zul.Update')}"
+									onClick="model.commit()" />
+							</row>
+						</rows>
+					</grid>
+				</form>
+			</tabpanel>
 			<tabpanel id="defaultQuestions">
 				<esquema id="esquema" ample="${amplaria}" datamodel="/model"
 					senseCriteris="true">
@@ -128,41 +187,6 @@
 				</esquema>
 			</tabpanel>
 
-			<tabpanel id="rememberPass_config">
-				<form id="form_config" dataPath="/model:/configuration" width="100%">
-					<grid id="grid_configuration">
-						<columns>
-							<column width="15em" />
-							<column width="50em" />
-						</columns>
-						<rows>
-							<row>
-								<label sclass="label" value="${c:l('rememberPass.zul.RequireQuestions')}" />
-								<listbox id="requireQuestion" bind="@required" mold="select"
-									onCreate="selectValue()" onSelect="selectValue()"
-									dataPath="/model:/requireAction">
-									<dataitem bind=".">
-										<listcell bind="@reqActionLiteral" />
-									</dataitem>
-								</listbox>
-							</row>
-							<row>
-								<label sclass="label" value="${c:l('rememberPass.zul.NumberOfQuestions')}" />
-								<textbox id="questions_number" width="40em" bind="@number" />
-							</row>
-							<row>
-								<label sclass="label" value="${c:l('rememberPass.zul.RightQuestions')}" />
-								<textbox id="questions_right_number" width="40em" bind="@right" />
-							</row>
-							<row>
-								<label />
-								<button label="${c:l('rememberPass.zul.Update')}"
-									onClick="model.commit()" />
-							</row>
-						</rows>
-					</grid>
-				</form>
-			</tabpanel>
 		</tabpanels>
 	</tabbox>
 </zk>

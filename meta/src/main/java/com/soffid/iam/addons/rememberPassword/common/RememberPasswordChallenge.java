@@ -9,7 +9,9 @@ import com.soffid.mda.annotation.*;
 
 @ValueObject 
 public abstract class RememberPasswordChallenge {
-
+	@Nullable
+	RecoverMethodEnum method;
+	
 	public java.lang.Long challengId;
 
 	public java.util.Collection<com.soffid.iam.addons.rememberPassword.common.UserAnswer> questions;
@@ -30,4 +32,7 @@ public abstract class RememberPasswordChallenge {
 	@Nullable
 	public java.lang.String dispatcher;
 
+	@Description ("PIN sent to the user by email")
+	@Nullable
+	public String emailPin;
 }

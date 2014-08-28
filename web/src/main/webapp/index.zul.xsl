@@ -15,17 +15,19 @@
 				import com.soffid.iam.addons.rememberPassword.service.ejb.RememberPasswordServiceHome;
 				import com.soffid.iam.addons.rememberPassword.service.ejb.RememberPasswordService;
 				
-				String userCode = Executions.getCurrent().getUserPrincipal().getName();
-				
-				javax.naming.Context context = new javax.naming.InitialContext();
-				Object rememberPassHome = context.lookup(RememberPasswordServiceHome.JNDI_NAME);
-				RememberPasswordService service = rememberPassHome.create();
-				
-				if (!service.checkUserConfiguration(userCode))
+				String userCode = es.caib.seycon.ng.utils.Security.getCurrentUser();
+				if (userCode != null)
 				{
-					Executions.getCurrent().getDesktop()
-						.getSession().setAttribute("paginaActual",
-							"addon/remember-password/user_rememberpass.zul");
+					javax.naming.Context context = new javax.naming.InitialContext();
+					Object rememberPassHome = context.lookup(RememberPasswordServiceHome.JNDI_NAME);
+					RememberPasswordService service = rememberPassHome.create();
+					
+					if (!service.checkUserConfiguration(userCode))
+					{
+						Executions.getCurrent().getDesktop()
+							.getSession().setAttribute("paginaActual",
+								"addon/remember-password/user_rememberpass.zul");
+					}
 				}
 			} catch (java.lang.SecurityException e) {
 			} catch (javax.ejb.AccessLocalException e) {}

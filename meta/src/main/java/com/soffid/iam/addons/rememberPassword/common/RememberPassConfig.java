@@ -15,5 +15,11 @@ public abstract class RememberPassConfig {
 	public java.lang.Integer number;
 
 	public java.lang.Integer right;
+	
+	public boolean allowQuestionRecovery;
+	
+	public boolean allowMailRecovery;
+	
+	public RecoverMethodEnum preferredMethod ;
 
 }

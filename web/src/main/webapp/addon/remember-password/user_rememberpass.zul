@@ -23,7 +23,7 @@
 				
 				catch (Exception ex){}
 				
-				String userCode = Executions.getCurrent().getUserPrincipal().getName();
+				String userCode = es.caib.seycon.ng.utils.Security.getCurrentUser();
 				model.getVariables().declareVariable("userCode", userCode);
 				
 				void onNewRow(data)
