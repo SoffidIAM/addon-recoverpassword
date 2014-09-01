@@ -12,6 +12,7 @@ import java.util.List;
 import org.apache.axis.InternalException;
 
 import com.soffid.iam.addons.rememberPassword.common.DefaultQuestion;
+import com.soffid.iam.addons.rememberPassword.common.RecoverMethodEnum;
 import com.soffid.iam.addons.rememberPassword.common.RememberPassConfig;
 import com.soffid.iam.addons.rememberPassword.common.RequireQuestion;
 import com.soffid.iam.addons.rememberPassword.common.UserAnswer;
@@ -30,6 +31,9 @@ import es.caib.seycon.ng.utils.Security;
  */
 public class RememberPasswordServiceImpl extends RememberPasswordServiceBase {
 
+	private static final String ALLOW_QUESTION_PROPERTY = "addon.retrieve.password.allow-question";
+	private static final String ALLOW_EMAIL_PROPERTY = "addon.retrieve.password.allow-mail";
+	private static final String PREFERRED_METHOD_PROPERTY = "addon.retrieve.password.preferred-method";
 	static String require = "addon.retrieve-password.require"; //$NON-NLS-1$
 	static String query_number = "addon.retrieve-password.query_number"; //$NON-NLS-1$
 	static String right_number = "addon.retrieve-password.right_number"; //$NON-NLS-1$
@@ -173,6 +177,57 @@ public class RememberPasswordServiceImpl extends RememberPasswordServiceBase {
 			getConfiguracioService().update(toUpdate);
 		}
 		
+		toUpdate = getConfiguracioService().findParametreByCodiAndCodiXarxa(
+				ALLOW_EMAIL_PROPERTY, null);
+		if (toUpdate == null) {
+			getConfiguracioService()
+					.create(new Configuracio(
+							ALLOW_EMAIL_PROPERTY,
+							Boolean.toString(config.isAllowMailRecovery()),
+							null,
+							"Allow email recovery",
+							null));
+		}
+		else 
+		{
+			toUpdate.setValor(Boolean.toString(config.isAllowMailRecovery()));
+			getConfiguracioService().update(toUpdate);
+		}
+
+		toUpdate = getConfiguracioService().findParametreByCodiAndCodiXarxa(
+				ALLOW_QUESTION_PROPERTY, null);
+		if (toUpdate == null) {
+			getConfiguracioService()
+					.create(new Configuracio(
+							ALLOW_QUESTION_PROPERTY,
+							Boolean.toString(config.isAllowQuestionRecovery()),
+							null,
+							"Allow question recovery",
+							null));
+		}
+		else 
+		{
+			toUpdate.setValor(Boolean.toString(config.isAllowQuestionRecovery()));
+			getConfiguracioService().update(toUpdate);
+		}
+
+		toUpdate = getConfiguracioService().findParametreByCodiAndCodiXarxa(
+				PREFERRED_METHOD_PROPERTY, null);
+		if (toUpdate == null) {
+			getConfiguracioService()
+					.create(new Configuracio(
+							PREFERRED_METHOD_PROPERTY,
+							config.getPreferredMethod().getValue(),
+							null,
+							"Preferred password recovery method",
+							null));
+		}
+		else 
+		{
+			toUpdate.setValor(config.getPreferredMethod().getValue());
+			getConfiguracioService().update(toUpdate);
+		}
+
 		audit (null ,null, "SC_RPQUES", "G"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
@@ -220,7 +275,27 @@ public class RememberPasswordServiceImpl extends RememberPasswordServiceBase {
 		systemConfig = System.getProperty(right_number);
 		configuration.setRight((systemConfig != null) ? Integer
 				.parseInt(systemConfig) : 0);
+		
+		systemConfig = System.getProperty(ALLOW_QUESTION_PROPERTY);
+		configuration.setAllowQuestionRecovery("true".equals(systemConfig));
 
+		systemConfig = System.getProperty(ALLOW_EMAIL_PROPERTY);
+		configuration.setAllowMailRecovery("true".equals(systemConfig));
+
+		systemConfig = System.getProperty(PREFERRED_METHOD_PROPERTY);
+		if (systemConfig == null)
+			configuration.setPreferredMethod(RecoverMethodEnum.RECOVER_BY_QUESTIONS);
+		else
+		{
+			try 
+			{
+				configuration.setPreferredMethod(RecoverMethodEnum.fromString(systemConfig));
+			} catch (Exception e)
+			{
+				configuration.setPreferredMethod(RecoverMethodEnum.RECOVER_BY_QUESTIONS);
+			}
+		}
+		
 		return configuration;
 	}
 
