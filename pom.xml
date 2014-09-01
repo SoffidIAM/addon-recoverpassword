@@ -5,7 +5,7 @@
   <artifactId>root</artifactId>
   <packaging>pom</packaging>
   <name>Retrieve password addon</name>
-  <version>1.1.0-SNAPSHOT</version>
+  <version>1.1.0-beta-1</version>
   <description>SOFFID IAM Retrieve password addon</description>
   <prerequisites>
     <maven>2.0.1</maven>
