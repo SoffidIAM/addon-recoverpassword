@@ -8,40 +8,35 @@
 		<![CDATA[
 			<div class="login">
 				<p>
-					<img src="/selfservice/anonymous/logo.png" alt="Soffid logo" />
+					<img src="/anonymous/logo.png" alt="Soffid logo" />
 				</p>
 				
 				<div class="loginbox">
-					<p>
-						Please, identify yourself to proceed
-					</p>
+					<p>${c:l('configure.header')}</p>
 					
-					<form method="post" action="/selfservice/j_security_check"
-						accept-charset="UTF-8">
-						<input name="j_method"  id="j_method_usu-pas" type="hidden" value="U"/>
+					<form method="post" action="/j_security_check" accept-charset="UTF-8">
+						<input id="j_method_usu-pas" name="j_method" 
+							type="hidden" value="U"/>
 						
 						<p>
-							<div class="inputlogin">User name:
-								<input name="j_username" id="j_username" type="text"
+							<div class="inputlogin">${c:l('configure.username')}
+								<input id="j_username" name="j_username" type="text"
 									autocomplete="off" />
 							</div>
 						</p>
 						
 						<p>
-							<div class="inputlogin">Password:
-								<input name="j_password" id="j_password" type="password"
-									autocomplete="off" />
+							<div class="inputlogin">${c:l('configure.password')}
+								<input id="j_password" name="j_password"
+									type="password" autocomplete="off" />
 							</div>
 						</p>
 						
-						<p style="color:red;">
-							${error}
-						</p>
-						
-						<input name="formUCboton" type="submit" value="Login"/>
+						<p style="color:red;">${error}</p>
+						<input name="formUCboton" type="submit" value="${c:l('configure.Login')}"/>
 						
 						<a href="anonymous/remember_pass_questions.zul">
-							Retrive password
+							${c:l('login.zul.retrieve')}
 						</a>
 					</form>
 				</div>

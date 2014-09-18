@@ -193,7 +193,7 @@ public class RememberPasswordUserServiceImpl extends
 	@Override
 	protected RememberPasswordChallenge handleRequestChallenge(String account,
 			String dispatcher) throws Exception {
-		if (dispatcher == null)
+		if (dispatcher == null || dispatcher.trim().length() == 0)
 			dispatcher = getInternalPasswordService().getDefaultDispatcher();
 		
 		Account acc = getAccountService().findAccount(account, dispatcher);
