@@ -19,14 +19,14 @@
 							type="hidden" value="U"/>
 						
 						<p>
-							<div class="inputlogin">${c:l('configure.username')}
+							<div class="inputlogin">${c:l('login.lblUser')}:
 								<input id="j_username" name="j_username" type="text"
 									autocomplete="off" />
 							</div>
 						</p>
 						
 						<p>
-							<div class="inputlogin">${c:l('configure.password')}
+							<div class="inputlogin">${c:l('login.lblPassword')}:
 								<input id="j_password" name="j_password"
 									type="password" autocomplete="off" />
 							</div>
