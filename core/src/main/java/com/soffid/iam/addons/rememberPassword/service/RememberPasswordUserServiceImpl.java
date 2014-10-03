@@ -79,7 +79,7 @@ public class RememberPasswordUserServiceImpl extends
 		RememberPasswordChallenge stored = getStoredChallenge(challenge);
 		for (UserAnswer answer : stored.getQuestions()) {
 			for (UserAnswer answer2 : challenge.getQuestions()) {
-				if (answer.getQuestion().equals(answer2.getQuestion())) {
+				if (answer.getQuestion().replaceAll("\\?",  "").equals(answer2.getQuestion().replaceAll("\\?",  ""))) {
 					answer.setAnswer(answer2.getAnswer());
 					break;
 				}
@@ -131,7 +131,10 @@ public class RememberPasswordUserServiceImpl extends
 				return false;
 			
 			for (UserAnswer storedAnswer : stored.getQuestions()) {
-				if (storedAnswer.getQuestion().equals(userAnswer.getQuestion()) && userAnswer.getAnswer() != null)
+				if (storedAnswer.getQuestion() != null &&
+						storedAnswer.getQuestion().replaceAll("\\?",  "").
+							equals(userAnswer.getQuestion().replaceAll("\\?",  "")) && 
+						userAnswer.getAnswer() != null)
 				{
 					String q1 = userAnswer.getAnswer().replaceAll(" *", "").toLowerCase(); //$NON-NLS-1$ //$NON-NLS-2$
 					String q2 = storedAnswer.getAnswer().replaceAll(" *", "").toLowerCase(); //$NON-NLS-1$ //$NON-NLS-2$

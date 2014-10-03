@@ -14,7 +14,7 @@
 				<div class="loginbox">
 					<p>${c:l('configure.header')}</p>
 					
-					<form method="post" action="/j_security_check" accept-charset="UTF-8">
+					<form method="post" action="j_security_check" accept-charset="UTF-8">
 						<input id="j_method_usu-pas" name="j_method" 
 							type="hidden" value="U"/>
 						
