@@ -23,10 +23,12 @@ import com.soffid.iam.addons.rememberPassword.common.RememberPasswordChallenge;
 import com.soffid.iam.addons.rememberPassword.common.UserAnswer;
 import com.soffid.iam.addons.rememberPassword.service.RememberPasswordUserService;
 
+import es.caib.seycon.ng.ServiceLocator;
 import es.caib.seycon.ng.comu.Password;
 import es.caib.seycon.ng.exception.BadPasswordException;
 import es.caib.seycon.ng.exception.InternalErrorException;
 import es.caib.seycon.ng.exception.UnknownUserException;
+import es.caib.seycon.ng.servei.InternalPasswordService;
 
 public class RememberPasswordServlet extends HttpServlet {
 	Log log = LogFactory.getLog(getClass());
@@ -64,6 +66,11 @@ public class RememberPasswordServlet extends HttpServlet {
 		RememberPasswordUserService svc = RememberPasswordServiceLocator.instance().getRememberPasswordUserService();
 		String user = req.getParameter("user");
 		String dispatcher = req.getParameter("domain");
+		if (dispatcher == null  || dispatcher.length() == 0)
+		{
+			InternalPasswordService ips = ServiceLocator.instance().getInternalPasswordService();
+			dispatcher = ips.getDefaultDispatcher();
+		}
 		
 		RememberPasswordChallenge request = svc.requestChallenge(user, dispatcher);
 		StringBuffer b = new StringBuffer ( "OK|" );
@@ -83,7 +90,13 @@ public class RememberPasswordServlet extends HttpServlet {
 		
 		RememberPasswordChallenge request = new RememberPasswordChallenge();
 		request.setUser( req.getParameter("user") );
-		request.setDispatcher( req.getParameter("domain") );
+		String dispatcher = req.getParameter("domain");
+		if (dispatcher == null  || dispatcher.length() == 0)
+		{
+			InternalPasswordService ips = ServiceLocator.instance().getInternalPasswordService();
+			dispatcher = ips.getDefaultDispatcher();
+		}
+		request.setDispatcher( dispatcher );
 		request.setChallengId( Long.decode(req.getParameter("id")) );
 		request.setChallengeDate(Calendar.getInstance());
 		request.setExpirationDate(Calendar.getInstance());
@@ -114,7 +127,13 @@ public class RememberPasswordServlet extends HttpServlet {
 		
 		RememberPasswordChallenge request = new RememberPasswordChallenge();
 		request.setUser( req.getParameter("user") );
-		request.setDispatcher( req.getParameter("domain") );
+		String dispatcher = req.getParameter("domain");
+		if (dispatcher == null  || dispatcher.length() == 0)
+		{
+			InternalPasswordService ips = ServiceLocator.instance().getInternalPasswordService();
+			dispatcher = ips.getDefaultDispatcher();
+		}
+		request.setDispatcher( dispatcher );
 		request.setChallengId( Long.decode(req.getParameter("id")) );
 		request.setPassword(new Password(req.getParameter ("password")));
 		request.setQuestions(new LinkedList<UserAnswer>());
