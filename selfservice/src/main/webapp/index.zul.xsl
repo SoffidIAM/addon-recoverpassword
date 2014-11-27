@@ -34,7 +34,7 @@
 		</zul:vbox>
 	</xsl:template>
 
-	<xsl:template match="zul:div" priority="3">
+	<xsl:template match="zul:div[@id='appletFirmaDiv']" priority="3">
 		<xsl:copy>
 			<xsl:apply-templates select="node()|@*" />
 		</xsl:copy>
