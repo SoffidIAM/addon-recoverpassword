@@ -4,10 +4,9 @@
 
 	<xsl:output method="xml" omit-xml-declaration="no" indent="yes" />
 
-	<xsl:template match="/zul:vbox" priority="3">
-		<xsl:copy>
-			<xsl:apply-templates select="node()|@*" />
-
+	<xsl:template match="/zul:vbox | /zul:box | /zul:zk" priority="3">
+		<zul:vbox>
+			<xsl:apply-templates select="@*" />
 			<attribute name="onCreate">
 				<![CDATA[
 				try {
@@ -31,7 +30,8 @@
 				} catch (javax.ejb.AccessLocalException e) {}
 				]]>
 			</attribute>
-		</xsl:copy>
+			<xsl:apply-templates select="node()" />
+		</zul:vbox>
 	</xsl:template>
 
 	<xsl:template match="zul:div" priority="3">
