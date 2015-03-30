@@ -79,6 +79,10 @@
 						es.caib.zkib.zkiblaf.Missatgebox.info(org.zkoss.util.resource
 								.Labels.getLabel("rememberPass.zul.ObtainQuestionsError") + e.getMessage());
 						return;
+					} catch (es.caib.seycon.ng.exception.UnknownUserException e) {
+						es.caib.zkib.zkiblaf.Missatgebox.info(org.zkoss.util.resource
+								.Labels.getLabel("rememberPass.zul.ObtainQuestionsError") + e.getMessage());
+						return;
 					}
 					
 					catch (javax.ejb.EJBException ex)

@@ -127,21 +127,21 @@ public class RememberPasswordUserServiceImpl extends
 		}
 		
 		for (UserAnswer userAnswer : userAnswers) {
-			if (userAnswer.getAnswer() == null)
-				return false;
-			
-			for (UserAnswer storedAnswer : stored.getQuestions()) {
-				if (storedAnswer.getQuestion() != null &&
-						storedAnswer.getQuestion().replaceAll("\\?",  "").
-							equals(userAnswer.getQuestion().replaceAll("\\?",  "")) && 
-						userAnswer.getAnswer() != null)
-				{
-					String q1 = userAnswer.getAnswer().replaceAll(" *", "").toLowerCase(); //$NON-NLS-1$ //$NON-NLS-2$
-					String q2 = storedAnswer.getAnswer().replaceAll(" *", "").toLowerCase(); //$NON-NLS-1$ //$NON-NLS-2$
-					if (q1.equals(q2)) {
-						answeredOK++;
-					} else {
-						audit (stored.getUser(), storedAnswer.getQuestion(), "SC_RPANSW", "F", null); //$NON-NLS-1$ //$NON-NLS-2$
+			if (userAnswer.getAnswer() != null)
+			{
+				for (UserAnswer storedAnswer : stored.getQuestions()) {
+					if (storedAnswer.getQuestion() != null &&
+							storedAnswer.getQuestion().replaceAll("\\?",  "").
+								equals(userAnswer.getQuestion().replaceAll("\\?",  "")) && 
+							userAnswer.getAnswer() != null)
+					{
+						String q1 = userAnswer.getAnswer().replaceAll(" *", "").toLowerCase(); //$NON-NLS-1$ //$NON-NLS-2$
+						String q2 = storedAnswer.getAnswer().replaceAll(" *", "").toLowerCase(); //$NON-NLS-1$ //$NON-NLS-2$
+						if (q1.equals(q2)) {
+							answeredOK++;
+						} else {
+							audit (stored.getUser(), storedAnswer.getQuestion(), "SC_RPANSW", "F", null); //$NON-NLS-1$ //$NON-NLS-2$
+						}
 					}
 				}
 			}
@@ -293,7 +293,10 @@ public class RememberPasswordUserServiceImpl extends
 
 		Collection<UserAnswer> requestQuestions = new LinkedList<UserAnswer>();
 
-		for (int i = 0; i < request; i++) {
+		while (requestQuestions.size() < request) {
+			if (userAnswers.isEmpty())
+				throw new InternalErrorException(
+						Messages.getString("RememberPasswordUserServiceImpl.UserQuestionsError")); //$NON-NLS-1$
 			int questionIndex = rand.nextInt(userAnswers.size());
 
 			if (checkUserAnswer(userAnswers.get(questionIndex)))
