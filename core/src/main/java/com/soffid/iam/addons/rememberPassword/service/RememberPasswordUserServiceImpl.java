@@ -282,7 +282,7 @@ public class RememberPasswordUserServiceImpl extends
 	private Collection<UserAnswer> generateQuestions(String user) throws InternalErrorException {
 		Random rand = new Random();
 		int request = getRememberPasswordService()
-				.getRememberPassConfiguration().getNumber();
+				.getRememberPassConfiguration().getQuestions();
 
 		List<UserAnswer> userAnswers = (List<UserAnswer>) getRememberPasswordService()
 				.findUserAnswersByUserName(user);
@@ -410,7 +410,7 @@ public class RememberPasswordUserServiceImpl extends
 		if (challenge.getMethod().equals(RecoverMethodEnum.RECOVER_BY_QUESTIONS))
 		{
 			request = getRememberPasswordService()
-					.getRememberPassConfiguration().getNumber();
+					.getRememberPassConfiguration().getQuestions();
 			right = getRememberPasswordService()
 					.getRememberPassConfiguration().getRight();
 			if (request <= 0 || right <= 0)
