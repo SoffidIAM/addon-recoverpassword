@@ -14,6 +14,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
+import com.soffid.iam.addons.rememberPassword.common.MissconfiguredRecoverException;
 import com.soffid.iam.addons.rememberPassword.common.RecoverMethodEnum;
 import com.soffid.iam.addons.rememberPassword.common.RememberPassConfig;
 import com.soffid.iam.addons.rememberPassword.common.RememberPasswordChallenge;
@@ -402,7 +403,7 @@ public class RememberPasswordUserServiceImpl extends
 		challenge.setMethod(guessRecoveryMethod (user));
 		
 		if (challenge.getMethod() == null)
-			throw new InternalErrorException(
+			throw new MissconfiguredRecoverException(
 					Messages.getString("RememberPasswordUserServiceImpl.UserQuestionsError")); //$NON-NLS-1$
 
 		int request;
