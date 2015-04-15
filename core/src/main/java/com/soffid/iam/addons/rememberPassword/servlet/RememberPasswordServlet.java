@@ -19,6 +19,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.soffid.iam.addons.rememberPassword.RememberPasswordServiceLocator;
+import com.soffid.iam.addons.rememberPassword.common.MissconfiguredRecoverException;
 import com.soffid.iam.addons.rememberPassword.common.RememberPasswordChallenge;
 import com.soffid.iam.addons.rememberPassword.common.UserAnswer;
 import com.soffid.iam.addons.rememberPassword.service.RememberPasswordUserService;
@@ -62,7 +63,7 @@ public class RememberPasswordServlet extends HttpServlet {
 	}
 
 	private String doRequestChallengeAction(HttpServletRequest req,
-			HttpServletResponse resp) throws InternalErrorException, UnsupportedEncodingException, UnknownUserException {
+			HttpServletResponse resp) throws InternalErrorException, UnsupportedEncodingException, UnknownUserException, MissconfiguredRecoverException {
 		RememberPasswordUserService svc = RememberPasswordServiceLocator.instance().getRememberPasswordUserService();
 		String user = req.getParameter("user");
 		String dispatcher = req.getParameter("domain");

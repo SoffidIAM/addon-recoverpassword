@@ -6,6 +6,8 @@ package com.soffid.iam.addons.rememberPassword.service;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+import es.caib.seycon.ng.comu.lang.MessageFactory;
+
 /**
  * @author (C) Soffid 2014
  *
@@ -20,10 +22,6 @@ public class Messages {
 	}
 
 	public static String getString(String key) {
-		try {
-			return RESOURCE_BUNDLE.getString(key);
-		} catch (MissingResourceException e) {
-			return '!' + key + '!';
-		}
+		return MessageFactory.getString(BUNDLE_NAME, key);
 	}
 }

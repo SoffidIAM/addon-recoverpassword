@@ -49,12 +49,14 @@
 				if (requireQuestion.getSelectedItem()
 							.getValue().getInstance() == RequireQuestion.DISABLED)
 				{
+					fillin_number.setDisabled(true);
 					questions_number.setDisabled(true);
 					questions_right_number.setDisabled(true);
 				}
 				
 				else
 				{
+					fillin_number.setDisabled(false);
 					questions_number.setDisabled(false);
 					questions_right_number.setDisabled(false);
 				}
@@ -113,8 +115,12 @@
 								</div>
 							</row> 
 							<row>
+								<label sclass="label" value="${c:l('rememberPass.zul.NumberOfQuestionsToFill')}" />
+								<textbox id="fillin_number" width="4em" bind="@number" />
+							</row>
+							<row>
 								<label sclass="label" value="${c:l('rememberPass.zul.NumberOfQuestions')}" />
-								<textbox id="questions_number" width="4em" bind="@number" />
+								<textbox id="questions_number" width="4em" bind="@questions" />
 							</row>
 							<row>
 								<label sclass="label" value="${c:l('rememberPass.zul.RightQuestions')}" />

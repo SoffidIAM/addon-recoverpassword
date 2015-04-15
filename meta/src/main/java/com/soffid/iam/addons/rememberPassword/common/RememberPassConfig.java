@@ -12,9 +12,14 @@ public abstract class RememberPassConfig {
 
 	public com.soffid.iam.addons.rememberPassword.common.RequireQuestion required;
 
+	@Description("Number of questions to fill in")
 	public java.lang.Integer number;
 
+	@Description("Number of questions to correctly answer to recover password")
 	public java.lang.Integer right;
+	
+	@Description("Number of questions to answer to recover passwords")
+	public java.lang.Integer questions;
 	
 	public boolean allowQuestionRecovery;
 	

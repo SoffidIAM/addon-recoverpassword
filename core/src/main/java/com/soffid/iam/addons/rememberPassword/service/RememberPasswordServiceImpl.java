@@ -35,6 +35,7 @@ public class RememberPasswordServiceImpl extends RememberPasswordServiceBase {
 	private static final String ALLOW_EMAIL_PROPERTY = "addon.retrieve.password.allow-mail";
 	private static final String PREFERRED_METHOD_PROPERTY = "addon.retrieve.password.preferred-method";
 	static String require = "addon.retrieve-password.require"; //$NON-NLS-1$
+	static String fillin_number = "addon.retrieve-password.fillin_number"; //$NON-NLS-1$
 	static String query_number = "addon.retrieve-password.query_number"; //$NON-NLS-1$
 	static String right_number = "addon.retrieve-password.right_number"; //$NON-NLS-1$
 
@@ -145,11 +146,11 @@ public class RememberPasswordServiceImpl extends RememberPasswordServiceBase {
 		}
 
 		toUpdate = getConfiguracioService().findParametreByCodiAndCodiXarxa(
-				query_number, null);
+				fillin_number, null);
 		if (toUpdate == null) {
 			getConfiguracioService()
 					.create(new Configuracio(
-							query_number,
+							fillin_number,
 							config.getNumber().toString(),
 							null,
 							Messages.getString("RememberPasswordServiceImpl.QuestionsNumber"), null)); //$NON-NLS-1$
@@ -157,6 +158,22 @@ public class RememberPasswordServiceImpl extends RememberPasswordServiceBase {
 
 		else {
 			toUpdate.setValor(config.getNumber().toString());
+			getConfiguracioService().update(toUpdate);
+		}
+
+		toUpdate = getConfiguracioService().findParametreByCodiAndCodiXarxa(
+				query_number, null);
+		if (toUpdate == null) {
+			getConfiguracioService()
+					.create(new Configuracio(
+							query_number,
+							config.getQuestions().toString(),
+							null,
+							Messages.getString("RememberPasswordServiceImpl.QuestionsNumber"), null)); //$NON-NLS-1$
+		}
+
+		else {
+			toUpdate.setValor(config.getQuestions().toString());
 			getConfiguracioService().update(toUpdate);
 		}
 
@@ -269,6 +286,12 @@ public class RememberPasswordServiceImpl extends RememberPasswordServiceBase {
 						: RequireQuestion.DISABLED);
 
 		systemConfig = System.getProperty(query_number);
+		configuration.setQuestions((systemConfig != null) ? Integer
+				.parseInt(systemConfig) : 0);
+
+		systemConfig = System.getProperty(fillin_number);
+		if (systemConfig == null)
+			systemConfig = System.getProperty(query_number);
 		configuration.setNumber((systemConfig != null) ? Integer
 				.parseInt(systemConfig) : 0);
 
