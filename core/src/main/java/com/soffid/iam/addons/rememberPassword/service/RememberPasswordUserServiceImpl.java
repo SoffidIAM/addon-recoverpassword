@@ -14,6 +14,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
+import com.soffid.iam.addons.rememberPassword.common.MissconfiguredRecoverException;
 import com.soffid.iam.addons.rememberPassword.common.RecoverMethodEnum;
 import com.soffid.iam.addons.rememberPassword.common.RememberPassConfig;
 import com.soffid.iam.addons.rememberPassword.common.RememberPasswordChallenge;
@@ -127,21 +128,21 @@ public class RememberPasswordUserServiceImpl extends
 		}
 		
 		for (UserAnswer userAnswer : userAnswers) {
-			if (userAnswer.getAnswer() == null)
-				return false;
-			
-			for (UserAnswer storedAnswer : stored.getQuestions()) {
-				if (storedAnswer.getQuestion() != null &&
-						storedAnswer.getQuestion().replaceAll("\\?",  "").
-							equals(userAnswer.getQuestion().replaceAll("\\?",  "")) && 
-						userAnswer.getAnswer() != null)
-				{
-					String q1 = userAnswer.getAnswer().replaceAll(" *", "").toLowerCase(); //$NON-NLS-1$ //$NON-NLS-2$
-					String q2 = storedAnswer.getAnswer().replaceAll(" *", "").toLowerCase(); //$NON-NLS-1$ //$NON-NLS-2$
-					if (q1.equals(q2)) {
-						answeredOK++;
-					} else {
-						audit (stored.getUser(), storedAnswer.getQuestion(), "SC_RPANSW", "F", null); //$NON-NLS-1$ //$NON-NLS-2$
+			if (userAnswer.getAnswer() != null)
+			{
+				for (UserAnswer storedAnswer : stored.getQuestions()) {
+					if (storedAnswer.getQuestion() != null &&
+							storedAnswer.getQuestion().replaceAll("\\?",  "").
+								equals(userAnswer.getQuestion().replaceAll("\\?",  "")) && 
+							userAnswer.getAnswer() != null)
+					{
+						String q1 = userAnswer.getAnswer().replaceAll(" *", "").toLowerCase(); //$NON-NLS-1$ //$NON-NLS-2$
+						String q2 = storedAnswer.getAnswer().replaceAll(" *", "").toLowerCase(); //$NON-NLS-1$ //$NON-NLS-2$
+						if (q1.equals(q2)) {
+							answeredOK++;
+						} else {
+							audit (stored.getUser(), storedAnswer.getQuestion(), "SC_RPANSW", "F", null); //$NON-NLS-1$ //$NON-NLS-2$
+						}
 					}
 				}
 			}
@@ -282,7 +283,7 @@ public class RememberPasswordUserServiceImpl extends
 	private Collection<UserAnswer> generateQuestions(String user) throws InternalErrorException {
 		Random rand = new Random();
 		int request = getRememberPasswordService()
-				.getRememberPassConfiguration().getNumber();
+				.getRememberPassConfiguration().getQuestions();
 
 		List<UserAnswer> userAnswers = (List<UserAnswer>) getRememberPasswordService()
 				.findUserAnswersByUserName(user);
@@ -293,7 +294,10 @@ public class RememberPasswordUserServiceImpl extends
 
 		Collection<UserAnswer> requestQuestions = new LinkedList<UserAnswer>();
 
-		for (int i = 0; i < request; i++) {
+		while (requestQuestions.size() < request) {
+			if (userAnswers.isEmpty())
+				throw new InternalErrorException(
+						Messages.getString("RememberPasswordUserServiceImpl.UserQuestionsError")); //$NON-NLS-1$
 			int questionIndex = rand.nextInt(userAnswers.size());
 
 			if (checkUserAnswer(userAnswers.get(questionIndex)))
@@ -399,7 +403,7 @@ public class RememberPasswordUserServiceImpl extends
 		challenge.setMethod(guessRecoveryMethod (user));
 		
 		if (challenge.getMethod() == null)
-			throw new InternalErrorException(
+			throw new MissconfiguredRecoverException(
 					Messages.getString("RememberPasswordUserServiceImpl.UserQuestionsError")); //$NON-NLS-1$
 
 		int request;
@@ -407,7 +411,7 @@ public class RememberPasswordUserServiceImpl extends
 		if (challenge.getMethod().equals(RecoverMethodEnum.RECOVER_BY_QUESTIONS))
 		{
 			request = getRememberPasswordService()
-					.getRememberPassConfiguration().getNumber();
+					.getRememberPassConfiguration().getQuestions();
 			right = getRememberPasswordService()
 					.getRememberPassConfiguration().getRight();
 			if (request <= 0 || right <= 0)

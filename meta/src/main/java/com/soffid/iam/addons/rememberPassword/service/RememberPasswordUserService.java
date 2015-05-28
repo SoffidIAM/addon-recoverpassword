@@ -5,6 +5,7 @@
 //
 
 package com.soffid.iam.addons.rememberPassword.service;
+import com.soffid.iam.addons.rememberPassword.common.MissconfiguredRecoverException;
 import com.soffid.iam.service.MailService;
 import com.soffid.mda.annotation.*;
 
@@ -28,20 +29,27 @@ import org.springframework.transaction.annotation.Transactional;
 	MailService.class})
 public abstract class RememberPasswordUserService {
 
+	/**
+	 * 
+	 * requestChallenge
+	 * 
+	 */
 	@Transactional(rollbackFor={java.lang.Exception.class})
 	@Description ("Request to recover an account password")
-	public com.soffid.iam.addons.rememberPassword.common.RememberPasswordChallenge requestChallenge(
+	public com.soffid.iam.addons.rememberPassword.common.RememberPasswordChallenge requestChallenge	(
 		java.lang.String account, 
 		@Nullable java.lang.String dispatcher)
-		throws es.caib.seycon.ng.exception.InternalErrorException, UnknownUserException {
+		throws es.caib.seycon.ng.exception.InternalErrorException, UnknownUserException, MissconfiguredRecoverException {
 	 return null;
 	}
+	
+	// =====================
 
 	@Description ("Request to recover a user password")
 	@Transactional(rollbackFor={java.lang.Exception.class})
 	public com.soffid.iam.addons.rememberPassword.common.RememberPasswordChallenge requestChallenge(
 		java.lang.String user)
-		throws es.caib.seycon.ng.exception.InternalErrorException, UnknownUserException {
+		throws es.caib.seycon.ng.exception.InternalErrorException, UnknownUserException, MissconfiguredRecoverException {
 	 return null;
 	}
 
