@@ -4,7 +4,7 @@
 
 	<xsl:output method="xml" omit-xml-declaration="no" indent="yes" />
 
-	<xsl:template match="zul:div" priority="3">
+	<xsl:template match="/zul:vbox/zul:div" priority="3">
 		<xsl:copy>
 			<xsl:apply-templates select="node()|@*" />
 		</xsl:copy>
@@ -15,14 +15,16 @@
 				import com.soffid.iam.addons.rememberPassword.service.ejb.RememberPasswordServiceHome;
 				import com.soffid.iam.addons.rememberPassword.service.ejb.RememberPasswordService;
 				
-				String userCode = es.caib.seycon.ng.utils.Security.getCurrentUser();
-				if (userCode != null)
+				javax.naming.Context context = new javax.naming.InitialContext();
+				user = context.lookup (es.caib.seycon.ng.servei.ejb.UsuariServiceHome.JNDI_NAME)
+					.create()
+					.getCurrentUsuari();
+				if (user != null)
 				{
-					javax.naming.Context context = new javax.naming.InitialContext();
 					Object rememberPassHome = context.lookup(RememberPasswordServiceHome.JNDI_NAME);
 					RememberPasswordService service = rememberPassHome.create();
 					
-					if (!service.checkUserConfiguration(userCode))
+					if (!service.checkUserConfiguration(user.getCodi()))
 					{
 						Executions.getCurrent().getDesktop()
 							.getSession().setAttribute("paginaActual",
