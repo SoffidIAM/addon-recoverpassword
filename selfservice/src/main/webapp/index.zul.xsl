@@ -13,14 +13,16 @@
 					import com.soffid.iam.addons.rememberPassword.service.ejb.RememberPasswordServiceHome;
 					import com.soffid.iam.addons.rememberPassword.service.ejb.RememberPasswordService;
 					
-					String userCode = es.caib.seycon.ng.utils.Security.getCurrentUser();
-					if (userCode != null)
+					javax.naming.Context context = new javax.naming.InitialContext();
+					user = context.lookup (es.caib.seycon.ng.servei.ejb.UsuariServiceHome.JNDI_NAME)
+						.create()
+						.getCurrentUsuari();
+					if (user != null)
 					{
-						javax.naming.Context context = new javax.naming.InitialContext();
 						Object rememberPassHome = context.lookup(RememberPasswordServiceHome.JNDI_NAME);
 						RememberPasswordService service = rememberPassHome.create();
 						
-						if (!service.checkUserConfiguration(userCode))
+						if (!service.checkUserConfiguration(user.getCodi()))
 						{
 							questions_window.setVisible(true);
 							questions_window.doHighlighted();
