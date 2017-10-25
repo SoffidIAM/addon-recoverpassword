@@ -31,7 +31,9 @@ public abstract class UserAnswerEntity {
 	@Nullable
 	public es.caib.seycon.ng.model.UsuariEntity user;
 
-	@DaoFinder("select userAnswer from com.soffid.iam.addons.rememberPassword.model.UserAnswerEntity as userAnswer where userAnswer.user.codi = :userCode")
+	@DaoFinder("select userAnswer "
+			+ "from com.soffid.iam.addons.rememberPassword.model.UserAnswerEntity as userAnswer "
+			+ "where userAnswer.user.userName = :userCode and userAnswer.user.tenant.id = :tenantId")
 	public java.util.List<com.soffid.iam.addons.rememberPassword.model.UserAnswerEntity> findByUser(
 		java.lang.String userCode) {
 	 return null;

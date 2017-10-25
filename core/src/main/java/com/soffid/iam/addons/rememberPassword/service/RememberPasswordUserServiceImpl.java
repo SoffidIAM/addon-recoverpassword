@@ -19,20 +19,18 @@ import com.soffid.iam.addons.rememberPassword.common.RecoverMethodEnum;
 import com.soffid.iam.addons.rememberPassword.common.RememberPassConfig;
 import com.soffid.iam.addons.rememberPassword.common.RememberPasswordChallenge;
 import com.soffid.iam.addons.rememberPassword.common.UserAnswer;
+import com.soffid.iam.api.Account;
+import com.soffid.iam.api.Audit;
+import com.soffid.iam.api.PolicyCheckResult;
+import com.soffid.iam.api.UserAccount;
+import com.soffid.iam.model.AuditEntity;
+import com.soffid.iam.model.PasswordDomainEntity;
+import com.soffid.iam.model.UserDataEntity;
+import com.soffid.iam.model.UserEntity;
 
-import es.caib.bpm.mail.EmailConfig;
-import es.caib.seycon.ng.comu.Account;
-import es.caib.seycon.ng.comu.Auditoria;
-import es.caib.seycon.ng.comu.PolicyCheckResult;
-import es.caib.seycon.ng.comu.UserAccount;
 import es.caib.seycon.ng.exception.BadPasswordException;
 import es.caib.seycon.ng.exception.InternalErrorException;
 import es.caib.seycon.ng.exception.UnknownUserException;
-import es.caib.seycon.ng.model.AuditoriaEntity;
-import es.caib.seycon.ng.model.DadaUsuariEntity;
-import es.caib.seycon.ng.model.DominiContrasenyaEntity;
-import es.caib.seycon.ng.model.UsuariEntity;
-import es.caib.seycon.ng.utils.MailUtils;
 
 /**
  * @author (C) Soffid 2014
@@ -172,10 +170,10 @@ public class RememberPasswordUserServiceImpl extends
 		String dispatcher = stored.getDispatcher();
 		if (dispatcher == null)
 			dispatcher = getInternalPasswordService().getDefaultDispatcher();
-		DominiContrasenyaEntity passwordDomain = getDispatcherEntityDao()
-				.findByCodi(dispatcher).getDomini();
-		audit (stored.getUser(), null, "SC_USUARI", "p", passwordDomain.getCodi()); //$NON-NLS-1$ //$NON-NLS-2$
-		UsuariEntity user = getUsuariEntityDao().findByCodi(stored.getUser());
+		PasswordDomainEntity passwordDomain = getSystemEntityDao()
+				.findByName(dispatcher).getPasswordDomain();
+		audit (stored.getUser(), null, "SC_USUARI", "p", passwordDomain.getName()); //$NON-NLS-1$ //$NON-NLS-2$
+		UserEntity user = getUserEntityDao().findByUserName(stored.getUser());
 		PolicyCheckResult verify = getInternalPasswordService().checkPolicy(user, passwordDomain, challenge.getPassword());
 		if (! verify.isValid())
 			throw new BadPasswordException(verify.getReason());
@@ -241,16 +239,16 @@ public class RememberPasswordUserServiceImpl extends
 	}
 
 	private String getRecoveryEmail(String user) {
-		UsuariEntity userEntity = getUsuariEntityDao().findByCodi(user);
+		UserEntity userEntity = getUserEntityDao().findByUserName(user);
 		if (userEntity == null)
 			return null;
-		for (DadaUsuariEntity dus: userEntity.getDadaUsuari())
+		for (UserDataEntity dus: userEntity.getUserData())
 		{
-			if (dus.getValorDada() != null && dus.getTipusDada().getCodi().equalsIgnoreCase("EMAIL")) //$NON-NLS-1$
-				return dus.getValorDada();
+			if (dus.getValue() != null && dus.getDataType().getName().equalsIgnoreCase("EMAIL")) //$NON-NLS-1$
+				return dus.getValue();
 		}
-		if (userEntity.getNomCurt() != null && userEntity.getDominiCorreu() != null)
-			return userEntity.getNomCurt()+"@"+userEntity.getDominiCorreu().getCodi(); //$NON-NLS-1$
+		if (userEntity.getShortName() != null && userEntity.getMailDomain() != null)
+			return userEntity.getShortName()+"@"+userEntity.getMailDomain().getName(); //$NON-NLS-1$
 		
 		return null;
 	}
@@ -377,21 +375,18 @@ public class RememberPasswordUserServiceImpl extends
 	}
 
 	private void audit(String auditedUser, String question, String object, String action, String passwordDomain) {
-		Auditoria auditoria = new Auditoria();
-		auditoria.setAccio(action); //$NON-NLS-1$
-		auditoria.setUsuari(auditedUser);
-		auditoria.setAutor(auditedUser);
+		Audit auditoria = new Audit();
+		auditoria.setAction(action); //$NON-NLS-1$
+		auditoria.setUser(auditedUser);
+		auditoria.setAuthor(auditedUser);
 		auditoria.setPasswordDomain(passwordDomain);
-		SimpleDateFormat dateFormat = new SimpleDateFormat(
-				"dd/MM/yyyy kk:mm:ss"); //$NON-NLS-1$
-		auditoria.setData(dateFormat.format(GregorianCalendar.getInstance()
-				.getTime()));
-		auditoria.setObjecte(object); //$NON-NLS-1$
+		auditoria.setCalendar(Calendar.getInstance());
+		auditoria.setObject(object); //$NON-NLS-1$
 		auditoria.setMessage(question);
 
-		AuditoriaEntity auditoriaEntity = getAuditoriaEntityDao()
-				.auditoriaToEntity(auditoria);
-		getAuditoriaEntityDao().create(auditoriaEntity);
+		AuditEntity auditoriaEntity = getAuditEntityDao()
+				.auditToEntity(auditoria);
+		getAuditEntityDao().create(auditoriaEntity);
 	}
 
 	@Override
@@ -423,7 +418,7 @@ public class RememberPasswordUserServiceImpl extends
 		}
 	
 		// Check existing user
-		if (getUsuariEntityDao().findByCodi(user) != null) {
+		if (getUserEntityDao().findByUserName(user) != null) {
 			Calendar date = Calendar.getInstance();
 
 			challenge.setChallengeDate(date);

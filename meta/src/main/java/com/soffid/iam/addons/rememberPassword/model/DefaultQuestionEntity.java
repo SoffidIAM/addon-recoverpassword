@@ -5,6 +5,7 @@
 //
 
 package com.soffid.iam.addons.rememberPassword.model;
+import com.soffid.iam.model.TenantEntity;
 import com.soffid.mda.annotation.*;
 
 @Entity (table="SC_RPQUES" )
@@ -23,4 +24,7 @@ public abstract class DefaultQuestionEntity {
 	@Nullable
 	public com.soffid.iam.addons.rememberPassword.model.UserAnswerEntity answerToQuestion;
 
+	@Column (name="DQU_TEN_ID")
+	@Nullable
+	TenantEntity tenant;
 }

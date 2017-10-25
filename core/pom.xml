@@ -3,7 +3,7 @@
   <parent>
     <artifactId>root</artifactId>
     <groupId>com.soffid.iam.addon.remember-password</groupId>
-    <version>1.2.5-SNAPSHOT</version>
+    <version>2.0.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>remember-password-core</artifactId>
@@ -103,14 +103,27 @@
       </plugin>
       <plugin>
         <artifactId>maven-ejb-plugin</artifactId>
-        <configuration>
-          <archive>
-            <manifest>
-              <addClasspath>true</addClasspath>
-            </manifest>
-          </archive>
-          <generateClient>false</generateClient>
-        </configuration>
+		<version>2.5.1</version>
+		<configuration>
+			<archive>
+				<manifest>
+					<addClasspath>false</addClasspath>
+				</manifest>
+			</archive>
+			<generateClient>true</generateClient>
+			<clientIncludes>
+				<clientInclude>
+					es/caib/seycon/ng/servei/ejb/*.class
+				</clientInclude>
+				<clientInclude>
+					es/caib/seycon/ng/servei/workflow/ejb/*.class
+				</clientInclude>
+				<clientInclude>
+					es/caib/seycon/ng/exception/*.class
+				</clientInclude>
+			</clientIncludes>
+			<ejbVersion>3.0</ejbVersion>
+		</configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -228,17 +241,23 @@
       <artifactId>remember-password-common</artifactId>
       <version>${pom.version}</version>
     </dependency>
-    <dependency>
-      <groupId>com.soffid.iam.console</groupId>
-      <artifactId>iam-core</artifactId>
-      <version>1.5.0-beta-1</version>
-      <scope>provided</scope>
-      <type>ejb</type>
-    </dependency>
-    <dependency>
-      <groupId>jboss</groupId>
-      <artifactId>jboss-j2ee</artifactId>
-    </dependency>
+	<dependency>
+		<groupId>com.soffid.iam.console</groupId>
+		<artifactId>iam-tomee</artifactId>
+		<version>${console.version}</version>
+	</dependency>
+	<dependency>
+		<groupId>com.soffid.iam.console</groupId>
+		<artifactId>iam-core</artifactId>
+		<version>${console.version}</version>
+		<type>ejb</type>
+	</dependency>
+	<dependency>
+		<groupId>org.apache.openejb</groupId>
+		<artifactId>javaee-api</artifactId>
+		<version>6.0-6</version>
+		<scope>provided</scope>
+	</dependency>
     <dependency xmlns:maven="http://maven.apache.org/POM/4.0.0">
       <groupId>bouncycastle</groupId>
       <artifactId>bcprov-jdk14</artifactId>
@@ -260,7 +279,7 @@
     <dependency>
       <groupId>com.soffid.iam.sync</groupId>
       <artifactId>syncserver</artifactId>
-      <version xmlns:maven="http://maven.apache.org/POM/4.0.0">1.4.0</version>
+      <version xmlns:maven="http://maven.apache.org/POM/4.0.0">2.0.0-M1</version>
       <scope>provided</scope>
       <optional>true</optional>
     </dependency>

@@ -4,43 +4,30 @@
 
 	<xsl:output method="xml" omit-xml-declaration="no" indent="yes" />
 
-	<xsl:template match="/zul:zk/zul:html/text()" priority="3">
+	<xsl:template match="/zul:zk/zul:html[@id='htmlData']/text()" priority="3">
 		<![CDATA[
-			<div class="login">
+		<div class="login">
+        		<p><img src="/anonymous/logo.png" alt="Soffid logo" /> </p> 
+			<div class="loginbox" id="loginbox"> 
+				<p>${c:l('configure.header')}</p>
+				<form method="post" action="j_security_check" id='loginForm' accept-charset="UTF-8">
+				<input name="j_method"  id="j_method_usu-pas" type="hidden" value="U"/>
+				<input name="j_username" id="j_username" type="hidden" value="${user }">
+				<input name="j_tenant" id="j_tenant" type="hidden" autocomplete="off"  onChange="updateUsername()" value="${tenant}"/>
 				<p>
-					<img src="/anonymous/logo.png" alt="Soffid logo" />
-				</p>
 				
-				<div class="loginbox">
-					<p>${c:l('configure.header')}</p>
-					
-					<form method="post" action="j_security_check" accept-charset="UTF-8">
-						<input id="j_method_usu-pas" name="j_method" 
-							type="hidden" value="U"/>
-						
-						<p>
-							<div class="inputlogin">${c:l('login.lblUser')}:
-								<input id="j_username" name="j_username" type="text"
-									autocomplete="off" />
-							</div>
-						</p>
-						
-						<p>
-							<div class="inputlogin">${c:l('login.lblPassword')}:
-								<input id="j_password" name="j_password"
-									type="password" autocomplete="off" />
-							</div>
-						</p>
-						
-						<p style="color:red;">${error}</p>
-						<input name="formUCboton" type="submit" value="${c:l('configure.Login')}"/>
-						
-						<a href="anonymous/remember_pass_questions.zul">
-							${c:l('login.zul.retrieve')}
-						</a>
-					</form>
-				</div>
-			</div>
+					<div class="inputlogin">${c:l('login.lblUser')} :
+					<input name="j_account" id="j_account" type="text" autocomplete="off" autofocus onChange="updateUsername ()" /></div>
+				</p>
+				<p>
+					<div class="inputlogin">${c:l('login.lblPassword')} :
+					<input name="j_password" id="j_password" type="password" autocomplete="off" value="${password }"/></div>
+				</p>
+				<p style="color:red;">${error}</p>
+				<input name="formUCboton" type="submit" value="${c:l('configure.Login')}">
+				<a href="anonymous/remember_pass_questions.zul">
+					${c:l('login.zul.retrieve')}
+				</a>
 		]]>
 	</xsl:template>
 
