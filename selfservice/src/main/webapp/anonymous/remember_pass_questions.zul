@@ -22,16 +22,9 @@
 				catch (Exception ex){}
 
 				com.soffid.iam.addons.rememberPassword.common.RememberPasswordChallenge challenge = null;
-				com.soffid.iam.addons.rememberPassword.service.ejb.RememberPasswordUserServiceHome home;
-				home= new javax.naming.InitialContext().
-						lookup(com.soffid.iam.addons.rememberPassword.service.ejb.RememberPasswordUserServiceHome.JNDI_NAME);
 				com.soffid.iam.addons.rememberPassword.service.ejb.RememberPasswordUserService ejb ;
-				ejb = home.create();
-				es.caib.loginModule.auth.ControladorSesion controladorSession = new es.caib.loginModule.auth.ControladorSesion ();
-				String untrustedRoute = es.caib.loginModule.auth.ClientIPValve.getUntrustedIPRoute();
-                if (untrustedRoute != null)
-                	controladorSession.getSesionEJB().setIPRoute(untrustedRoute);
-				controladorSession.addCookie(Executions.getCurrent().getNativeResponse());
+				ejb = new javax.naming.InitialContext().
+						lookup(com.soffid.iam.addons.rememberPassword.service.ejb.RememberPasswordUserServiceHome.JNDI_NAME);
 
 				void showPolicy ()
 				{
@@ -163,8 +156,10 @@
 										.Labels.getLabel("changepass.CanviOK"),
 									org.zkoss.util.resource.Labels.getLabel("changepass.CanviPWD")))
 						{
-							controladorSession.autenticar( txt_user.getValue(), challenge.getPassword().getPassword());
-							controladorSession.addCookie(Executions.getCurrent().getNativeResponse());
+							session.setAttribute("samlLoginToken", new String [] {
+								txt_user.getValue(), 
+								challenge.getPassword().getPassword()
+							});
 							Executions.sendRedirect("/");
 						}
 					}

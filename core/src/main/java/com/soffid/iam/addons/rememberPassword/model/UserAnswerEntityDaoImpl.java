@@ -19,7 +19,7 @@ public class UserAnswerEntityDaoImpl extends UserAnswerEntityDaoBase
 	@Override
 	public void toUserAnswer(UserAnswerEntity source, UserAnswer target) {
 		super.toUserAnswer(source, target);
-		target.setUser(source.getUser().getCodi());
+		target.setUser(source.getUser().getUserName());
 	}
 
 	/* (non-Javadoc)
@@ -29,6 +29,6 @@ public class UserAnswerEntityDaoImpl extends UserAnswerEntityDaoBase
 	public void userAnswerToEntity(UserAnswer source, UserAnswerEntity target,
 			boolean copyIfNull) {
 		super.userAnswerToEntity(source, target, copyIfNull);
-		target.setUser(getUsuariEntityDao().findByCodi(source.getUser()));
+		target.setUser(getUserEntityDao().findByUserName(source.getUser()));
 	}
 }

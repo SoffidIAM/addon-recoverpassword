@@ -15,12 +15,10 @@
 					
 					javax.naming.Context context = new javax.naming.InitialContext();
 					user = context.lookup (es.caib.seycon.ng.servei.ejb.UsuariServiceHome.JNDI_NAME)
-						.create()
 						.getCurrentUsuari();
 					if (user != null)
 					{
-						Object rememberPassHome = context.lookup(RememberPasswordServiceHome.JNDI_NAME);
-						RememberPasswordService service = rememberPassHome.create();
+						RememberPasswordService service = context.lookup(RememberPasswordServiceHome.JNDI_NAME);
 						
 						if (!service.checkUserConfiguration(user.getCodi()))
 						{

@@ -4,12 +4,11 @@
 package com.soffid.iam.addons.rememberPassword.service;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.GregorianCalendar;
 import java.util.LinkedList;
 import java.util.List;
-
-import org.apache.axis.InternalException;
 
 import com.soffid.iam.addons.rememberPassword.common.DefaultQuestion;
 import com.soffid.iam.addons.rememberPassword.common.RecoverMethodEnum;
@@ -19,11 +18,13 @@ import com.soffid.iam.addons.rememberPassword.common.UserAnswer;
 import com.soffid.iam.addons.rememberPassword.model.DefaultQuestionEntity;
 import com.soffid.iam.addons.rememberPassword.model.DefaultQuestionEntityDao;
 import com.soffid.iam.addons.rememberPassword.model.UserAnswerEntity;
+import com.soffid.iam.api.Audit;
+import com.soffid.iam.api.Configuration;
+import com.soffid.iam.model.AuditEntity;
+import com.soffid.iam.utils.ConfigurationCache;
+import com.soffid.iam.utils.Security;
 
-import es.caib.seycon.ng.comu.Auditoria;
-import es.caib.seycon.ng.comu.Configuracio;
-import es.caib.seycon.ng.model.AuditoriaEntity;
-import es.caib.seycon.ng.utils.Security;
+import es.caib.seycon.ng.exception.InternalErrorException;
 
 /**
  * @author (C) Soffid 2014
@@ -124,15 +125,15 @@ public class RememberPasswordServiceImpl extends RememberPasswordServiceBase {
 	 */
 	@Override
 	protected void handleUpdate(RememberPassConfig config) throws Exception {
-		Configuracio toUpdate = null;
+		Configuration toUpdate = null;
 
 		checkConfigurationValues(config);
 
-		toUpdate = getConfiguracioService().findParametreByCodiAndCodiXarxa(
+		toUpdate = getConfigurationService().findParameterByNameAndNetworkName(
 				require, null);
 		if (toUpdate == null) {
-			getConfiguracioService()
-					.create(new Configuracio(
+			getConfigurationService()
+					.create(new Configuration(
 							require,
 							config.getRequired().toString(),
 							null,
@@ -141,15 +142,15 @@ public class RememberPasswordServiceImpl extends RememberPasswordServiceBase {
 		}
 
 		else {
-			toUpdate.setValor(config.getRequired().toString());
-			getConfiguracioService().update(toUpdate);
+			toUpdate.setValue(config.getRequired().toString());
+			getConfigurationService().update(toUpdate);
 		}
 
-		toUpdate = getConfiguracioService().findParametreByCodiAndCodiXarxa(
+		toUpdate = getConfigurationService().findParameterByNameAndNetworkName(
 				fillin_number, null);
 		if (toUpdate == null) {
-			getConfiguracioService()
-					.create(new Configuracio(
+			getConfigurationService()
+					.create(new Configuration(
 							fillin_number,
 							config.getNumber().toString(),
 							null,
@@ -157,15 +158,15 @@ public class RememberPasswordServiceImpl extends RememberPasswordServiceBase {
 		}
 
 		else {
-			toUpdate.setValor(config.getNumber().toString());
-			getConfiguracioService().update(toUpdate);
+			toUpdate.setValue(config.getNumber().toString());
+			getConfigurationService().update(toUpdate);
 		}
 
-		toUpdate = getConfiguracioService().findParametreByCodiAndCodiXarxa(
+		toUpdate = getConfigurationService().findParameterByNameAndNetworkName(
 				query_number, null);
 		if (toUpdate == null) {
-			getConfiguracioService()
-					.create(new Configuracio(
+			getConfigurationService()
+					.create(new Configuration(
 							query_number,
 							config.getQuestions().toString(),
 							null,
@@ -173,15 +174,15 @@ public class RememberPasswordServiceImpl extends RememberPasswordServiceBase {
 		}
 
 		else {
-			toUpdate.setValor(config.getQuestions().toString());
-			getConfiguracioService().update(toUpdate);
+			toUpdate.setValue(config.getQuestions().toString());
+			getConfigurationService().update(toUpdate);
 		}
 
-		toUpdate = getConfiguracioService().findParametreByCodiAndCodiXarxa(
+		toUpdate = getConfigurationService().findParameterByNameAndNetworkName(
 				right_number, null);
 		if (toUpdate == null) {
-			getConfiguracioService()
-					.create(new Configuracio(
+			getConfigurationService()
+					.create(new Configuration(
 							right_number,
 							config.getRight().toString(),
 							null,
@@ -190,15 +191,15 @@ public class RememberPasswordServiceImpl extends RememberPasswordServiceBase {
 		}
 
 		else {
-			toUpdate.setValor(config.getRight().toString());
-			getConfiguracioService().update(toUpdate);
+			toUpdate.setValue(config.getRight().toString());
+			getConfigurationService().update(toUpdate);
 		}
 		
-		toUpdate = getConfiguracioService().findParametreByCodiAndCodiXarxa(
+		toUpdate = getConfigurationService().findParameterByNameAndNetworkName(
 				ALLOW_EMAIL_PROPERTY, null);
 		if (toUpdate == null) {
-			getConfiguracioService()
-					.create(new Configuracio(
+			getConfigurationService()
+					.create(new Configuration(
 							ALLOW_EMAIL_PROPERTY,
 							Boolean.toString(config.isAllowMailRecovery()),
 							null,
@@ -207,15 +208,15 @@ public class RememberPasswordServiceImpl extends RememberPasswordServiceBase {
 		}
 		else 
 		{
-			toUpdate.setValor(Boolean.toString(config.isAllowMailRecovery()));
-			getConfiguracioService().update(toUpdate);
+			toUpdate.setValue(Boolean.toString(config.isAllowMailRecovery()));
+			getConfigurationService().update(toUpdate);
 		}
 
-		toUpdate = getConfiguracioService().findParametreByCodiAndCodiXarxa(
+		toUpdate = getConfigurationService().findParameterByNameAndNetworkName(
 				ALLOW_QUESTION_PROPERTY, null);
 		if (toUpdate == null) {
-			getConfiguracioService()
-					.create(new Configuracio(
+			getConfigurationService()
+					.create(new Configuration(
 							ALLOW_QUESTION_PROPERTY,
 							Boolean.toString(config.isAllowQuestionRecovery()),
 							null,
@@ -224,15 +225,15 @@ public class RememberPasswordServiceImpl extends RememberPasswordServiceBase {
 		}
 		else 
 		{
-			toUpdate.setValor(Boolean.toString(config.isAllowQuestionRecovery()));
-			getConfiguracioService().update(toUpdate);
+			toUpdate.setValue(Boolean.toString(config.isAllowQuestionRecovery()));
+			getConfigurationService().update(toUpdate);
 		}
 
-		toUpdate = getConfiguracioService().findParametreByCodiAndCodiXarxa(
+		toUpdate = getConfigurationService().findParameterByNameAndNetworkName(
 				PREFERRED_METHOD_PROPERTY, null);
 		if (toUpdate == null) {
-			getConfiguracioService()
-					.create(new Configuracio(
+			getConfigurationService()
+					.create(new Configuration(
 							PREFERRED_METHOD_PROPERTY,
 							config.getPreferredMethod().getValue(),
 							null,
@@ -241,8 +242,8 @@ public class RememberPasswordServiceImpl extends RememberPasswordServiceBase {
 		}
 		else 
 		{
-			toUpdate.setValor(config.getPreferredMethod().getValue());
-			getConfiguracioService().update(toUpdate);
+			toUpdate.setValue(config.getPreferredMethod().getValue());
+			getConfigurationService().update(toUpdate);
 		}
 
 		audit (null ,null, "SC_RPQUES", "G"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -253,15 +254,16 @@ public class RememberPasswordServiceImpl extends RememberPasswordServiceBase {
 	 * 
 	 * @param config
 	 *            Configuration to check.
+	 * @throws InternalErrorException 
 	 */
-	private void checkConfigurationValues(RememberPassConfig config) {
+	private void checkConfigurationValues(RememberPassConfig config) throws InternalErrorException {
 		if (config.getRequired() != RequireQuestion.DISABLED) {
 			if (config.getNumber() == 0)
-				throw new InternalException(
+				throw new InternalErrorException(
 						Messages.getString("RememberPasswordServiceImpl.ErrorQuestionsNumber")); //$NON-NLS-1$
 
 			if (config.getRight() == 0)
-				throw new InternalException(
+				throw new InternalErrorException(
 						Messages.getString("RememberPasswordServiceImpl.ErrorRitghtQuestions")); //$NON-NLS-1$
 		}
 	}
@@ -279,33 +281,33 @@ public class RememberPasswordServiceImpl extends RememberPasswordServiceBase {
 		RememberPassConfig configuration = new RememberPassConfig();
 		String systemConfig = null;
 
-		systemConfig = System.getProperty(require);
+		systemConfig = ConfigurationCache.getProperty(require);
 		configuration
 				.setRequired((systemConfig != null) ? RequireQuestion
 						.fromString(systemConfig)
 						: RequireQuestion.DISABLED);
 
-		systemConfig = System.getProperty(query_number);
+		systemConfig = ConfigurationCache.getProperty(query_number);
 		configuration.setQuestions((systemConfig != null) ? Integer
 				.parseInt(systemConfig) : 0);
 
-		systemConfig = System.getProperty(fillin_number);
+		systemConfig = ConfigurationCache.getProperty(fillin_number);
 		if (systemConfig == null)
-			systemConfig = System.getProperty(query_number);
+			systemConfig = ConfigurationCache.getProperty(query_number);
 		configuration.setNumber((systemConfig != null) ? Integer
 				.parseInt(systemConfig) : 0);
 
-		systemConfig = System.getProperty(right_number);
+		systemConfig = ConfigurationCache.getProperty(right_number);
 		configuration.setRight((systemConfig != null) ? Integer
 				.parseInt(systemConfig) : 0);
 		
-		systemConfig = System.getProperty(ALLOW_QUESTION_PROPERTY);
+		systemConfig = ConfigurationCache.getProperty(ALLOW_QUESTION_PROPERTY);
 		configuration.setAllowQuestionRecovery("true".equals(systemConfig));
 
-		systemConfig = System.getProperty(ALLOW_EMAIL_PROPERTY);
+		systemConfig = ConfigurationCache.getProperty(ALLOW_EMAIL_PROPERTY);
 		configuration.setAllowMailRecovery("true".equals(systemConfig));
 
-		systemConfig = System.getProperty(PREFERRED_METHOD_PROPERTY);
+		systemConfig = ConfigurationCache.getProperty(PREFERRED_METHOD_PROPERTY);
 		if (systemConfig == null)
 			configuration.setPreferredMethod(RecoverMethodEnum.RECOVER_BY_QUESTIONS);
 		else
@@ -451,20 +453,17 @@ public class RememberPasswordServiceImpl extends RememberPasswordServiceBase {
 
 	private void audit(String auditedUser, String question, String object, String action) {
 		String codiUsuari = Security.getCurrentAccount();
-		Auditoria auditoria = new Auditoria();
-		auditoria.setAccio(action); //$NON-NLS-1$
-		auditoria.setUsuari(auditedUser);
-		auditoria.setAutor(codiUsuari);
-		SimpleDateFormat dateFormat = new SimpleDateFormat(
-				"dd/MM/yyyy kk:mm:ss"); //$NON-NLS-1$
-		auditoria.setData(dateFormat.format(GregorianCalendar.getInstance()
-				.getTime()));
-		auditoria.setObjecte(object); //$NON-NLS-1$
+		Audit auditoria = new Audit();
+		auditoria.setAction(action); //$NON-NLS-1$
+		auditoria.setUser(auditedUser);
+		auditoria.setAuthor(codiUsuari);
+		auditoria.setCalendar(Calendar.getInstance());
+		auditoria.setObject(object); //$NON-NLS-1$
 		auditoria.setMessage(question);
 
-		AuditoriaEntity auditoriaEntity = getAuditoriaEntityDao()
-				.auditoriaToEntity(auditoria);
-		getAuditoriaEntityDao().create(auditoriaEntity);
+		AuditEntity auditoriaEntity = getAuditEntityDao()
+				.auditToEntity(auditoria);
+		getAuditEntityDao().create(auditoriaEntity);
 	}
 
 }

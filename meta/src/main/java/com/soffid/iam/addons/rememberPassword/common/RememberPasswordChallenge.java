@@ -8,7 +8,7 @@ package com.soffid.iam.addons.rememberPassword.common;
 import com.soffid.mda.annotation.*;
 
 @ValueObject 
-public abstract class RememberPasswordChallenge {
+public class RememberPasswordChallenge {
 	@Nullable
 	RecoverMethodEnum method;
 	
