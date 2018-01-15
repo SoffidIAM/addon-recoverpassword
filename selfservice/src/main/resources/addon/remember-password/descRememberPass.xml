@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<zkib-model>
+	<datanode name="remember-password">
+		<finder name="default_questions" type="default_questions">
+			<ejb-finder
+				jndi="openejb:/local/soffid.ejb.com.soffid.iam.addons.rememberPassword.service.RememberPasswordService"
+				method="findAllDefaultQuestions" if="${canQueryDefaultQuestions}"> <!-- remember-password:query -->
+			</ejb-finder>
+			<new-instance-bean
+				className="com.soffid.iam.addons.rememberPassword.common.DefaultQuestion" />
+		</finder>
+
+		<finder name="configuration" type="configuration">
+			<ejb-finder
+				jndi="openejb:/local/soffid.ejb.com.soffid.iam.addons.rememberPassword.service.RememberPasswordService"
+				method="getRememberPassConfiguration" if="${canQueryDefaultQuestions}"> <!-- remember-password:query -->
+			</ejb-finder>
+			<new-instance-bean
+				className="com.soffid.iam.addons.rememberPassword.common.RememberPassConfig" />
+		</finder>
+
+		<finder name="requireAction" type="requireAction">
+			<script-finder>
+				c = new java.util.LinkedList();
+				c.add(com.soffid.iam.addons.rememberPassword.common.RequireQuestion.DISABLED);
+				c.add(com.soffid.iam.addons.rememberPassword.common.RequireQuestion.REQUIRED);
+				c.add(com.soffid.iam.addons.rememberPassword.common.RequireQuestion.OPTIONAL);
+
+				return c;
+			</script-finder>
+		</finder>
+
+		<finder name="user_answers" type="user_answers">
+			<ejb-finder
+				jndi="openejb:/local/soffid.ejb.com.soffid.iam.addons.rememberPassword.service.RememberPasswordService"
+				method="findUserAnswersByUserName"> <!-- remember-password:query -->
+				<parameter value="${userCode}" />
+			</ejb-finder>
+			<new-instance-bean
+				className="com.soffid.iam.addons.rememberPassword.common.UserAnswer" />
+		</finder>
+	</datanode>
+
+	<datanode name="challenge">
+		<finder name="request_challenge" type="request_challenge">
+			<ejb-finder
+				jndi="openejb:/local/soffid.ejb.com.soffid.iam.addons.rememberPassword.service.RememberPasswordService"
+				method="requestChallenge">
+			</ejb-finder>
+			<new-instance-bean
+				className="com.soffid.iam.addons.rememberPassword.common.RememberPasswordChallenge" />
+		</finder>
+	</datanode>
+
+	<datanode name="default_questions">
+		<ejb-handler
+			jndi="openejb:/local/soffid.ejb.com.soffid.iam.addons.rememberPassword.service.RememberPasswordService">
+			<insert-method method="create" returnBean="true">
+				<parameter value="${instance}" />
+			</insert-method>
+			<delete-method method="delete">
+				<parameter value="${instance}" />
+			</delete-method>
+			<update-method method="update">
+				<parameter value="${instance}" />
+			</update-method>
+		</ejb-handler>
+		<validator>
+			<attribute-validator expr="${instance.question}"
+				notNull="true" friendlyName="rememberPassword.ValueValidation" />
+		</validator>
+	</datanode>
+
+	<datanode name="configuration">
+		<ejb-handler
+			jndi="openejb:/local/soffid.ejb.com.soffid.iam.addons.rememberPassword.service.RememberPasswordService">
+			<update-method method="update">
+				<parameter value="${instance}" />
+			</update-method>
+		</ejb-handler>
+	</datanode>
+
+	<datanode name="requireAction">
+		<custom-attribute name="reqActionLiteral">
+			return
+			org.zkoss.util.resource.Labels.getLabel("RequireQuestion."
+			+ instance.toString());
+		</custom-attribute>
+	</datanode>
+
+	<datanode name="user_answers">
+		<ejb-handler
+			jndi="openejb:/local/soffid.ejb.com.soffid.iam.addons.rememberPassword.service.RememberPasswordService">
+			<insert-method method="create" returnBean="true">
+				<parameter value="${instance}" />
+			</insert-method>
+			<delete-method method="remove">
+				<parameter value="${instance}" />
+			</delete-method>
+			<update-method method="update">
+				<parameter value="${instance}" />
+			</update-method>
+		</ejb-handler>
+		<validator>
+			<attribute-validator expr="${instance.question}"
+				notNull="true" friendlyName="Question can not be null" />
+			<attribute-validator expr="${instance.answer}"
+				notNull="true" friendlyName="Answer can not be null" />
+		</validator>
+	</datanode>
+	
+	<datanode name="challenge"/>
+</zkib-model>

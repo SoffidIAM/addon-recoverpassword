@@ -7,6 +7,6 @@
 package com.soffid.iam.addons.rememberPassword;
 import com.soffid.mda.annotation.*;
 
-@Role (name="tothom" )
+@Role (name="anonymous" )
 public abstract class tothom {
 }
