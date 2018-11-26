@@ -14,6 +14,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
+import org.apache.commons.logging.LogFactory;
+
 import com.soffid.iam.addons.rememberPassword.common.MissconfiguredRecoverException;
 import com.soffid.iam.addons.rememberPassword.common.RecoverMethodEnum;
 import com.soffid.iam.addons.rememberPassword.common.RememberPassConfig;
@@ -41,6 +43,7 @@ public class RememberPasswordUserServiceImpl extends
 
 	HashMap<Long, RememberPasswordChallenge> challenges = new HashMap<Long, RememberPasswordChallenge>();
 	long nextPurge = 0;
+	org.apache.commons.logging.Log log = LogFactory.getLog(getClass());
 
 	private void purge() {
 		synchronized (challenges) {
@@ -125,22 +128,29 @@ public class RememberPasswordUserServiceImpl extends
 				.findUserAnswersByUserName(stored.getUser());
 		}
 		
+		log.info("Testing answers ");
+
 		for (UserAnswer userAnswer : userAnswers) {
+			log.info("Testing answer "+userAnswer.getQuestion());
 			if (userAnswer.getAnswer() != null)
 			{
 				for (UserAnswer storedAnswer : stored.getQuestions()) {
+					log.info("Stored "+storedAnswer.getQuestion()+"=>"+storedAnswer.getAnswer());
 					if (storedAnswer.getQuestion() != null &&
+							storedAnswer.getAnswer() != null &&
 							storedAnswer.getQuestion().replaceAll("\\?",  "").
-								equals(userAnswer.getQuestion().replaceAll("\\?",  "")) && 
-							userAnswer.getAnswer() != null)
+								equalsIgnoreCase(userAnswer.getQuestion().replaceAll("\\?",  "")))
 					{
 						String q1 = userAnswer.getAnswer().replaceAll(" *", "").toLowerCase(); //$NON-NLS-1$ //$NON-NLS-2$
 						String q2 = storedAnswer.getAnswer().replaceAll(" *", "").toLowerCase(); //$NON-NLS-1$ //$NON-NLS-2$
 						if (q1.equals(q2)) {
 							answeredOK++;
+							log.info("Answered correctly "+storedAnswer.getQuestion()+" ("+answeredOK+")");
 						} else {
 							audit (stored.getUser(), storedAnswer.getQuestion(), "SC_RPANSW", "F", null); //$NON-NLS-1$ //$NON-NLS-2$
 						}
+					} else {
+						log.info("Skip answer "+storedAnswer.getQuestion());
 					}
 				}
 			}
@@ -235,7 +245,8 @@ public class RememberPasswordUserServiceImpl extends
 	}
 
 	private boolean hasRecoveryEmail(String user) {
-		return getRecoveryEmail (user) != null;
+		String email = getRecoveryEmail (user);
+		return email != null && !email.trim().isEmpty();
 	}
 
 	private String getRecoveryEmail(String user) {
@@ -439,9 +450,12 @@ public class RememberPasswordUserServiceImpl extends
 		}
 
 		RememberPasswordChallenge challenge2 = new RememberPasswordChallenge(challenge);
-		for (Iterator<UserAnswer> it = challenge2.getQuestions().iterator(); it.hasNext();)
+		challenge2.setQuestions( new LinkedList<UserAnswer>( ));
+		for (UserAnswer u: challenge.getQuestions())
 		{
-			it.next().setAnswer(null);
+			UserAnswer u2 = new UserAnswer(u);
+			u2.setAnswer(null);
+			challenge2.getQuestions().add(u2);
 		}
 		challenge2.setEmailPin(null);
 		audit (challenge2.getUser(), null, "SC_RPANSW", "R", null); //$NON-NLS-1$ //$NON-NLS-2$
