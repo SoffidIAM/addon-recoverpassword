@@ -113,14 +113,14 @@
     <dependency>
       <groupId>com.soffid.zkib</groupId>
       <artifactId>zkiblaf</artifactId>
-      <version xmlns:maven="http://maven.apache.org/POM/4.0.0">1.11</version>
+      <version xmlns:maven="http://maven.apache.org/POM/4.0.0">1.24</version>
       <classifier>classes</classifier>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>com.soffid.zkib</groupId>
       <artifactId>zkdb</artifactId>
-      <version xmlns:maven="http://maven.apache.org/POM/4.0.0">1.11</version>
+      <version xmlns:maven="http://maven.apache.org/POM/4.0.0">1.40</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
