@@ -29,6 +29,7 @@ import com.soffid.iam.model.AuditEntity;
 import com.soffid.iam.model.PasswordDomainEntity;
 import com.soffid.iam.model.UserDataEntity;
 import com.soffid.iam.model.UserEntity;
+import com.soffid.iam.utils.Security;
 
 import es.caib.seycon.ng.exception.BadPasswordException;
 import es.caib.seycon.ng.exception.InternalErrorException;
@@ -78,23 +79,28 @@ public class RememberPasswordUserServiceImpl extends
 	@Override
 	protected boolean handleResponseChallenge(
 			RememberPasswordChallenge challenge) throws Exception {
-		RememberPasswordChallenge stored = getStoredChallenge(challenge);
-		for (UserAnswer answer : stored.getQuestions()) {
-			for (UserAnswer answer2 : challenge.getQuestions()) {
-				if (answer.getQuestion().replaceAll("\\?",  "").equals(answer2.getQuestion().replaceAll("\\?",  ""))) {
-					answer.setAnswer(answer2.getAnswer());
-					break;
+		Security.nestedLogin(Security.ALL_PERMISSIONS);
+		try {
+			RememberPasswordChallenge stored = getStoredChallenge(challenge);
+			for (UserAnswer answer : stored.getQuestions()) {
+				for (UserAnswer answer2 : challenge.getQuestions()) {
+					if (answer.getQuestion().replaceAll("\\?",  "").equals(answer2.getQuestion().replaceAll("\\?",  ""))) {
+						answer.setAnswer(answer2.getAnswer());
+						break;
+					}
 				}
 			}
+	
+			// Verify answers
+			if (verifyAnswers(stored)) {
+				audit (stored.getUser(), null, "SC_RPANSW", "S", null); //$NON-NLS-1$ //$NON-NLS-2$
+				stored.setAnswered(true);
+				return true;
+			} else
+				return false;
+		} finally {
+			Security.nestedLogoff();
 		}
-
-		// Verify answers
-		if (verifyAnswers(stored)) {
-			audit (stored.getUser(), null, "SC_RPANSW", "S", null); //$NON-NLS-1$ //$NON-NLS-2$
-			stored.setAnswered(true);
-			return true;
-		} else
-			return false;
 	}
 
 	/**
@@ -174,24 +180,29 @@ public class RememberPasswordUserServiceImpl extends
 	@Override
 	protected void handleResetPassword(RememberPasswordChallenge challenge)
 			throws Exception {
-		RememberPasswordChallenge stored = getStoredChallenge(challenge);
-		if (!stored.isAnswered())
-			throw new InternalErrorException(Messages.getString("RememberPasswordUserServiceImpl.NoAnswerError")); //$NON-NLS-1$
-		String dispatcher = stored.getDispatcher();
-		if (dispatcher == null)
-			dispatcher = getInternalPasswordService().getDefaultDispatcher();
-		PasswordDomainEntity passwordDomain = getSystemEntityDao()
-				.findByName(dispatcher).getPasswordDomain();
-		audit (stored.getUser(), null, "SC_USUARI", "p", passwordDomain.getName()); //$NON-NLS-1$ //$NON-NLS-2$
-		UserEntity user = getUserEntityDao().findByUserName(stored.getUser());
-		PolicyCheckResult verify = getInternalPasswordService().checkPolicy(user, passwordDomain, challenge.getPassword());
-		if (! verify.isValid())
-			throw new BadPasswordException(verify.getReason());
-		
-		getInternalPasswordService().storeAndSynchronizePassword(user,
-				passwordDomain, challenge.getPassword(), false);
-		synchronized (challenges) {
-			challenges.remove(challenge.getChallengId());
+		Security.nestedLogin(Security.ALL_PERMISSIONS);
+		try {
+			RememberPasswordChallenge stored = getStoredChallenge(challenge);
+			if (!stored.isAnswered())
+				throw new InternalErrorException(Messages.getString("RememberPasswordUserServiceImpl.NoAnswerError")); //$NON-NLS-1$
+			String dispatcher = stored.getDispatcher();
+			if (dispatcher == null)
+				dispatcher = getInternalPasswordService().getDefaultDispatcher();
+			PasswordDomainEntity passwordDomain = getSystemEntityDao()
+					.findByName(dispatcher).getPasswordDomain();
+			audit (stored.getUser(), null, "SC_USUARI", "p", passwordDomain.getName()); //$NON-NLS-1$ //$NON-NLS-2$
+			UserEntity user = getUserEntityDao().findByUserName(stored.getUser());
+			PolicyCheckResult verify = getInternalPasswordService().checkPolicy(user, passwordDomain, challenge.getPassword());
+			if (! verify.isValid())
+				throw new BadPasswordException(verify.getReason());
+			
+			getInternalPasswordService().storeAndSynchronizePassword(user,
+					passwordDomain, challenge.getPassword(), false);
+			synchronized (challenges) {
+				challenges.remove(challenge.getChallengId());
+			}
+		} finally {
+			Security.nestedLogoff();
 		}
 	}
 
@@ -208,16 +219,22 @@ public class RememberPasswordUserServiceImpl extends
 		if (dispatcher == null || dispatcher.trim().length() == 0)
 			dispatcher = getInternalPasswordService().getDefaultDispatcher();
 		
-		Account acc = getAccountService().findAccount(account, dispatcher);
-		if (acc == null)
-			throw new UnknownUserException(account+" at "+dispatcher);
-		if (! (acc instanceof UserAccount))
-		{
-			throw new UnknownUserException(account+" at "+dispatcher);
+		Security.nestedLogin(Security.ALL_PERMISSIONS);
+		try {
+			Account acc = getAccountService().findAccount(account, dispatcher);
+			if (acc == null)
+				throw new UnknownUserException(account+" at "+dispatcher);
+			if (! (acc instanceof UserAccount))
+			{
+				throw new UnknownUserException(account+" at "+dispatcher);
+			}
+			String user = ( (UserAccount) acc ).getUser();
+			
+			return handleRequestChallenge (user);
+		} finally {
+			Security.nestedLogoff();
 		}
-		String user = ( (UserAccount) acc ).getUser();
-		
-		return handleRequestChallenge (user);
+		 
 	}
 
 	private RecoverMethodEnum guessRecoveryMethod(String user) throws InternalErrorException {
@@ -403,63 +420,67 @@ public class RememberPasswordUserServiceImpl extends
 	@Override
 	protected RememberPasswordChallenge handleRequestChallenge(String user)
 			throws Exception {
-		
-		RememberPasswordChallenge challenge = new RememberPasswordChallenge();
-
-		challenge.setMethod(guessRecoveryMethod (user));
-		
-		if (challenge.getMethod() == null)
-			throw new MissconfiguredRecoverException(
-					Messages.getString("RememberPasswordUserServiceImpl.UserQuestionsError")); //$NON-NLS-1$
-
-		int request;
-		int right;
-		if (challenge.getMethod().equals(RecoverMethodEnum.RECOVER_BY_QUESTIONS))
-		{
-			request = getRememberPasswordService()
-					.getRememberPassConfiguration().getQuestions();
-			right = getRememberPasswordService()
-					.getRememberPassConfiguration().getRight();
-			if (request <= 0 || right <= 0)
-				throw new InternalErrorException (Messages.getString("RememberPasswordUserServiceImpl.disabledFeature")); //$NON-NLS-1$
-		}
-		else
-		{
-			request = right = 1;
-		}
+		Security.nestedLogin(Security.ALL_PERMISSIONS);
+		try {
+			RememberPasswordChallenge challenge = new RememberPasswordChallenge();
 	
-		// Check existing user
-		if (getUserEntityDao().findByUserName(user) != null) {
-			Calendar date = Calendar.getInstance();
-
-			challenge.setChallengeDate(date);
-
-			date.add(Calendar.MINUTE, 30);
-			challenge.setExpirationDate(date);
+			challenge.setMethod(guessRecoveryMethod (user));
+			
+			if (challenge.getMethod() == null)
+				throw new MissconfiguredRecoverException(
+						Messages.getString("RememberPasswordUserServiceImpl.UserQuestionsError")); //$NON-NLS-1$
+	
+			int request;
+			int right;
 			if (challenge.getMethod().equals(RecoverMethodEnum.RECOVER_BY_QUESTIONS))
-				challenge.setQuestions(generateQuestions(user));
-			else
-				challenge.setQuestions(generateEmail(challenge, user));
-			challenge.setUser(user);
-			challenge.setChallengId(new Long(challenge.hashCode()));
-			synchronized (challenges) {
-				challenges.put(challenge.getChallengId(), challenge);
+			{
+				request = getRememberPasswordService()
+						.getRememberPassConfiguration().getQuestions();
+				right = getRememberPasswordService()
+						.getRememberPassConfiguration().getRight();
+				if (request <= 0 || right <= 0)
+					throw new InternalErrorException (Messages.getString("RememberPasswordUserServiceImpl.disabledFeature")); //$NON-NLS-1$
 			}
-		} else {
-			throw new UnknownUserException(Messages.getString("RememberPasswordUserServiceImpl.UserNotFoundError")); //$NON-NLS-1$
+			else
+			{
+				request = right = 1;
+			}
+		
+			// Check existing user
+			if (getUserEntityDao().findByUserName(user) != null) {
+				Calendar date = Calendar.getInstance();
+	
+				challenge.setChallengeDate(date);
+	
+				date.add(Calendar.MINUTE, 30);
+				challenge.setExpirationDate(date);
+				if (challenge.getMethod().equals(RecoverMethodEnum.RECOVER_BY_QUESTIONS))
+					challenge.setQuestions(generateQuestions(user));
+				else
+					challenge.setQuestions(generateEmail(challenge, user));
+				challenge.setUser(user);
+				challenge.setChallengId(new Long(challenge.hashCode()));
+				synchronized (challenges) {
+					challenges.put(challenge.getChallengId(), challenge);
+				}
+			} else {
+				throw new UnknownUserException(Messages.getString("RememberPasswordUserServiceImpl.UserNotFoundError")); //$NON-NLS-1$
+			}
+	
+			RememberPasswordChallenge challenge2 = new RememberPasswordChallenge(challenge);
+			challenge2.setQuestions( new LinkedList<UserAnswer>( ));
+			for (UserAnswer u: challenge.getQuestions())
+			{
+				UserAnswer u2 = new UserAnswer(u);
+				u2.setAnswer(null);
+				challenge2.getQuestions().add(u2);
+			}
+			challenge2.setEmailPin(null);
+			audit (challenge2.getUser(), null, "SC_RPANSW", "R", null); //$NON-NLS-1$ //$NON-NLS-2$
+			return challenge2;
+		} finally {
+			Security.nestedLogoff();
 		}
-
-		RememberPasswordChallenge challenge2 = new RememberPasswordChallenge(challenge);
-		challenge2.setQuestions( new LinkedList<UserAnswer>( ));
-		for (UserAnswer u: challenge.getQuestions())
-		{
-			UserAnswer u2 = new UserAnswer(u);
-			u2.setAnswer(null);
-			challenge2.getQuestions().add(u2);
-		}
-		challenge2.setEmailPin(null);
-		audit (challenge2.getUser(), null, "SC_RPANSW", "R", null); //$NON-NLS-1$ //$NON-NLS-2$
-		return challenge2;
 	}
 
 }
