@@ -127,6 +127,10 @@
 								<textbox id="questions_right_number" width="4em" bind="@right" />
 							</row>
 							<row>
+								<label sclass="label" value="${c:l('rememberPass.zul.password.reuse')}" />
+								<checkbox bind="@allowPasswordReuse" />
+							</row>
+							<row>
 								<label />
 								<button label="${c:l('rememberPass.zul.Update')}"
 									onClick="model.commit()" />

@@ -279,7 +279,7 @@
     <dependency>
       <groupId>com.soffid.iam.sync</groupId>
       <artifactId>syncserver</artifactId>
-      <version xmlns:maven="http://maven.apache.org/POM/4.0.0">2.0.0-M1</version>
+      <version xmlns:maven="http://maven.apache.org/POM/4.0.0">2.8.0</version>
       <scope>provided</scope>
       <optional>true</optional>
     </dependency>

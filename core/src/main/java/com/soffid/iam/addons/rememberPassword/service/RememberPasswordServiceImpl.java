@@ -34,6 +34,7 @@ public class RememberPasswordServiceImpl extends RememberPasswordServiceBase {
 
 	private static final String ALLOW_QUESTION_PROPERTY = "addon.retrieve.password.allow-question";
 	private static final String ALLOW_EMAIL_PROPERTY = "addon.retrieve.password.allow-mail";
+	private static final String ALLOW_PASSWORD_REUSE = "addon.retrieve.password.allow-reuse";
 	private static final String PREFERRED_METHOD_PROPERTY = "addon.retrieve.password.preferred-method";
 	static String require = "addon.retrieve-password.require"; //$NON-NLS-1$
 	static String fillin_number = "addon.retrieve-password.fillin_number"; //$NON-NLS-1$
@@ -213,6 +214,23 @@ public class RememberPasswordServiceImpl extends RememberPasswordServiceBase {
 		}
 
 		toUpdate = getConfigurationService().findParameterByNameAndNetworkName(
+				ALLOW_PASSWORD_REUSE, null);
+		if (toUpdate == null) {
+			getConfigurationService()
+					.create(new Configuration(
+							ALLOW_PASSWORD_REUSE,
+							Boolean.toString(config.isAllowPasswordReuse()),
+							null,
+							"Allow reuse password",
+							null));
+		}
+		else 
+		{
+			toUpdate.setValue(Boolean.toString(config.isAllowPasswordReuse()));
+			getConfigurationService().update(toUpdate);
+		}
+
+		toUpdate = getConfigurationService().findParameterByNameAndNetworkName(
 				ALLOW_QUESTION_PROPERTY, null);
 		if (toUpdate == null) {
 			getConfigurationService()
@@ -306,6 +324,9 @@ public class RememberPasswordServiceImpl extends RememberPasswordServiceBase {
 
 		systemConfig = ConfigurationCache.getProperty(ALLOW_EMAIL_PROPERTY);
 		configuration.setAllowMailRecovery("true".equals(systemConfig));
+
+		systemConfig = ConfigurationCache.getProperty(ALLOW_PASSWORD_REUSE);
+		configuration.setAllowPasswordReuse("true".equals(systemConfig));
 
 		systemConfig = ConfigurationCache.getProperty(PREFERRED_METHOD_PROPERTY);
 		if (systemConfig == null)

@@ -243,7 +243,7 @@
   <properties>
     <!-- Workflow dependencies -->
     <mda.version>67</mda.version>
-    <console.version>2.0.0-M1</console.version>
+    <console.version>2.8.0</console.version>
     <mda.model>Soffid-PasswordRecover-Addon</mda.model>
   </properties>
   <pluginRepositories>

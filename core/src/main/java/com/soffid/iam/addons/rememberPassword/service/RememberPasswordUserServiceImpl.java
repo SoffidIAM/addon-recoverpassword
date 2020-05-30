@@ -3,11 +3,9 @@
  */
 package com.soffid.iam.addons.rememberPassword.service;
 
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -23,14 +21,23 @@ import com.soffid.iam.addons.rememberPassword.common.RememberPasswordChallenge;
 import com.soffid.iam.addons.rememberPassword.common.UserAnswer;
 import com.soffid.iam.api.Account;
 import com.soffid.iam.api.Audit;
+import com.soffid.iam.api.PasswordValidation;
 import com.soffid.iam.api.PolicyCheckResult;
+import com.soffid.iam.api.SoffidObjectType;
 import com.soffid.iam.api.UserAccount;
+import com.soffid.iam.model.AccountEntity;
 import com.soffid.iam.model.AuditEntity;
 import com.soffid.iam.model.PasswordDomainEntity;
+import com.soffid.iam.model.ServerEntity;
+import com.soffid.iam.model.UserAccountEntity;
 import com.soffid.iam.model.UserDataEntity;
 import com.soffid.iam.model.UserEntity;
+import com.soffid.iam.remote.RemoteServiceLocator;
+import com.soffid.iam.sync.engine.intf.DebugTaskResults;
+import com.soffid.iam.sync.service.SyncStatusService;
 import com.soffid.iam.utils.Security;
 
+import es.caib.seycon.ng.comu.ServerType;
 import es.caib.seycon.ng.exception.BadPasswordException;
 import es.caib.seycon.ng.exception.InternalErrorException;
 import es.caib.seycon.ng.exception.UnknownUserException;
@@ -141,7 +148,7 @@ public class RememberPasswordUserServiceImpl extends
 			if (userAnswer.getAnswer() != null)
 			{
 				for (UserAnswer storedAnswer : stored.getQuestions()) {
-					log.info("Stored "+storedAnswer.getQuestion()+"=>"+storedAnswer.getAnswer());
+//					log.info("Stored "+storedAnswer.getQuestion()+"=>"+storedAnswer.getAnswer());
 					if (storedAnswer.getQuestion() != null &&
 							storedAnswer.getAnswer() != null &&
 							storedAnswer.getQuestion().replaceAll("\\?",  "").
@@ -192,18 +199,60 @@ public class RememberPasswordUserServiceImpl extends
 					.findByName(dispatcher).getPasswordDomain();
 			audit (stored.getUser(), null, "SC_USUARI", "p", passwordDomain.getName()); //$NON-NLS-1$ //$NON-NLS-2$
 			UserEntity user = getUserEntityDao().findByUserName(stored.getUser());
-			PolicyCheckResult verify = getInternalPasswordService().checkPolicy(user, passwordDomain, challenge.getPassword());
-			if (! verify.isValid())
-				throw new BadPasswordException(verify.getReason());
 			
-			getInternalPasswordService().storeAndSynchronizePassword(user,
-					passwordDomain, challenge.getPassword(), false);
+			RememberPassConfig config = getRememberPasswordService().getRememberPassConfiguration();
+			if (config.isAllowPasswordReuse() && 
+					getInternalPasswordService().checkPassword(user, passwordDomain, challenge.getPassword(), true, false) == PasswordValidation.PASSWORD_GOOD)
+			{ 
+				for ( UserAccountEntity ua: user.getAccounts())
+				{
+					AccountEntity account = ua.getAccount();
+					if (! account.isDisabled() && "S".equals(account.getSystem().getTrusted()) &&
+							account.getSystem().getUrl() != null)
+						synchronizeAccount (account);
+				}
+			} else {
+				PolicyCheckResult verify = getInternalPasswordService().checkPolicy(user, passwordDomain, challenge.getPassword());
+				if (! verify.isValid())
+					throw new BadPasswordException(verify.getReason());
+				
+				getInternalPasswordService().storeAndSynchronizePassword(user,
+						passwordDomain, challenge.getPassword(), false);
+			}
 			synchronized (challenges) {
 				challenges.remove(challenge.getChallengId());
 			}
 		} finally {
 			Security.nestedLogoff();
 		}
+	}
+
+	private void synchronizeAccount(AccountEntity account) throws Exception {
+		Exception lastException = null;
+
+		for (ServerEntity se : getServerEntityDao().loadAll()) {
+            if (se.getType().equals(ServerType.MASTERSERVER)) {
+            	SyncStatusService sss = null;
+                try {
+                    RemoteServiceLocator rsl = new com.soffid.iam.remote.RemoteServiceLocator(se.getName());
+                    rsl.setAuthToken(se.getAuth());
+                    sss = rsl.getSyncStatusService();
+                } catch (Exception e) {
+                    lastException = e;
+                }
+                if (sss != null)
+                {
+                	DebugTaskResults r = sss.testPropagateObject(account.getSystem().getName(), 
+                			SoffidObjectType.OBJECT_ACCOUNT, 
+                			account.getName(), null);
+                	if (r != null && r.getException() != null)
+                		throw r.getException();
+                	return;
+                }
+            }
+        }
+		if (lastException != null)
+			throw lastException;
 	}
 
 	/*
@@ -242,6 +291,7 @@ public class RememberPasswordUserServiceImpl extends
 		
 		if (config.getPreferredMethod().equals (RecoverMethodEnum.RECOVER_BY_MAIL))
 		{
+//			log.info("Preferred email");
 			if (hasRecoveryEmail (user) && config.isAllowMailRecovery())
 				return RecoverMethodEnum.RECOVER_BY_MAIL;
 			else if (hasQuestions (user) && config.isAllowQuestionRecovery())
@@ -251,6 +301,7 @@ public class RememberPasswordUserServiceImpl extends
 		}
 		else
 		{
+//			log.info("Preferred questions");
 			if (hasQuestions (user) && config.isAllowQuestionRecovery())
 				return RecoverMethodEnum.RECOVER_BY_QUESTIONS;
 			else if (hasRecoveryEmail (user) && config.isAllowMailRecovery())

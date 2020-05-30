@@ -11,6 +11,7 @@ import com.soffid.mda.annotation.*;
 
 import es.caib.seycon.ng.exception.BadPasswordException;
 import es.caib.seycon.ng.exception.UnknownUserException;
+import es.caib.seycon.ng.model.ServerEntity;
 import es.caib.seycon.ng.servei.AccountService;
 
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 	es.caib.seycon.ng.model.DispatcherEntity.class,
 	com.soffid.iam.addons.rememberPassword.common.RememberPasswordChallenge.class,
 	AccountService.class,
+	ServerEntity.class,
 	MailService.class})
 public abstract class RememberPasswordUserService {
 

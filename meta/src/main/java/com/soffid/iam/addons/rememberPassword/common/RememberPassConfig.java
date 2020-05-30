@@ -25,6 +25,8 @@ public class RememberPassConfig {
 	
 	public boolean allowMailRecovery;
 	
+	public boolean allowPasswordReuse;
+	
 	public RecoverMethodEnum preferredMethod ;
 
 }
