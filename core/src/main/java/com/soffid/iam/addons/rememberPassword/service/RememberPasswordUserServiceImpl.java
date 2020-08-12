@@ -89,6 +89,8 @@ public class RememberPasswordUserServiceImpl extends
 		Security.nestedLogin(Security.ALL_PERMISSIONS);
 		try {
 			RememberPasswordChallenge stored = getStoredChallenge(challenge);
+      if (stored==null)
+			  return false;
 			for (UserAnswer answer : stored.getQuestions()) {
 				for (UserAnswer answer2 : challenge.getQuestions()) {
 					if (answer.getQuestion().replaceAll("\\?",  "").equals(answer2.getQuestion().replaceAll("\\?",  ""))) {
