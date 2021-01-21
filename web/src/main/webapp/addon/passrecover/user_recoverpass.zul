@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?taglib uri="/WEB-INF/tld/web/core.dsp.tld" prefix="c" ?>
+
+<zk xmlns:h="http://www.w3.org/1999/xhtml">
+
+	<datamodel id="model" rootNode="recover-password"
+		src="addon/passrecover/descPasswordRecovery.xml" />
+
+	<window id="window" mode="highlighted" title="${c:l('recoverPass.Titol') }" 
+		position="center, top" use="com.soffid.iam.addon.passrecover.web.UserQuestionsHandler"
+		style="max-width: 600px; width: 80%">
+		<label sclass="titolperfil" value="${c:l('recoverPass.zul.Title')}"/>
+		
+		<div>
+			<label value="${c:l('recoverPass.zul.Explanation1')}"/>
+			<separator/>
+			
+			<label id="exp2"/>
+			<separator/>
+			
+			<label id="exp3"/>
+		</div>
+		<separator/>
+		
+		<datatable id="listbox" autocommit="false"
+						dataPath="/model:/user_answers"
+						sortColumn="0"
+						onChangeQuestion="ref:window.changeQuestion"
+						onChangeAnswer="ref:window.changeAnswer"
+						onRemove="ref:window.removeAnswer"
+						enablefilter="false"
+						updateRowEvent="false"
+						maxheight="40vh"> 
+			<attribute name="columns"><![CDATA[
+- name: ${c:l('recoverPass.zul.Question2') }
+  template: <input type="text" style="width: 100%; border: none" value="#{question }" onInput="zkDatatable.sendClientAction(this, 'onChangeQuestion', [event.target.value])"/>
+- name: ${c:l('recoverPass.zul.Answer') }
+  value: answer
+  template: <input type="text" style="width: 100%; border: none" value="#{answer }" onInput="zkDatatable.sendClientAction(this, 'onChangeAnswer', [event.target.value])"/>
+- name: ""
+  sort: false
+  className: selector
+  template: <img src="${execution.contextPath }/img/remove.svg" class="imageclic" onClick="zkDatatable.sendClientAction(this, 'onRemove')"/>
+				]]> </attribute>
+
+		</datatable>
+		<div width="100%" style="text-align: right" >
+			<div class="addButton" onClick="ref:window.addNew">+</div>
+		</div>
+
+		
+		<button id="save_remember_password"
+			label="${c:l('recoverPass.zul.Close')}" onClick="ref:window.close">
+		</button>
+	</window>
+</zk>

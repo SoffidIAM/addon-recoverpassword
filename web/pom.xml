@@ -2,11 +2,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <parent>
     <artifactId>root</artifactId>
-    <groupId>com.soffid.iam.addon.remember-password</groupId>
+    <groupId>com.soffid.iam.addon.recover-password</groupId>
     <version>2.0.4-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>remember-password-web</artifactId>
+  <artifactId>recover-password-web</artifactId>
   <packaging>war</packaging>
   <name>Retrieve password Web module</name>
   <licenses xmlns:maven="http://maven.apache.org/POM/4.0.0">
@@ -82,13 +82,13 @@
   <dependencies>
     <dependency>
       <groupId>${pom.groupId}</groupId>
-      <artifactId>remember-password-common</artifactId>
+      <artifactId>recover-password-common</artifactId>
       <version>${pom.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>${pom.groupId}</groupId>
-      <artifactId>remember-password-core</artifactId>
+      <artifactId>recover-password-core</artifactId>
       <version>${pom.version}</version>
       <type>ejb</type>
       <scope>provided</scope>
@@ -120,7 +120,7 @@
     <dependency>
       <groupId>com.soffid.zkib</groupId>
       <artifactId>zkdb</artifactId>
-      <version xmlns:maven="http://maven.apache.org/POM/4.0.0">1.40</version>
+      <version xmlns:maven="http://maven.apache.org/POM/4.0.0">1.44-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -140,6 +140,13 @@
       <artifactId>dom4j</artifactId>
       <version>1.6.1</version>
       <scope>provided</scope>
+    </dependency>
+    <dependency>
+    	<groupId>com.soffid.iam.console</groupId>
+    	<artifactId>iam-web</artifactId>
+    	<version>${console.version}</version>
+    	<classifier>classes</classifier>
+    	<scope>provided</scope>
     </dependency>
   </dependencies>
 </project>

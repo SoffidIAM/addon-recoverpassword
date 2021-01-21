@@ -2,13 +2,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <parent>
     <artifactId>root</artifactId>
-    <groupId>com.soffid.iam.addon.remember-password</groupId>
+    <groupId>com.soffid.iam.addon.recover-password</groupId>
     <version>2.0.4-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>remember-password-core</artifactId>
+  <artifactId>recover-password-core</artifactId>
   <packaging>ejb</packaging>
-  <name>Retrieve password Core Business Tier</name>
+  <name>Recover password Core Business Tier</name>
   <licenses xmlns:maven="http://maven.apache.org/POM/4.0.0">
     <license>
       <name>GNU GPL Version 3.0</name>
@@ -238,7 +238,7 @@
   <dependencies>
     <dependency>
       <groupId>${pom.groupId}</groupId>
-      <artifactId>remember-password-common</artifactId>
+      <artifactId>recover-password-common</artifactId>
       <version>${pom.version}</version>
     </dependency>
 	<dependency>

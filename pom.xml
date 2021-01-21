@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:maven="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.soffid.iam.addon.remember-password</groupId>
+  <groupId>com.soffid.iam.addon.recover-password</groupId>
   <artifactId>root</artifactId>
   <packaging>pom</packaging>
-  <name>Retrieve password addon</name>
+  <name>Recover password addon</name>
   <version>2.0.4-SNAPSHOT</version>
-  <description>SOFFID IAM Retrieve password addon</description>
+  <description>SOFFID IAM Recover password addon</description>
   <prerequisites>
     <maven>2.0.1</maven>
   </prerequisites>
@@ -100,7 +100,6 @@
     <module>common</module>
     <module>core</module>
     <module>web</module>
-    <module>selfservice</module>
     <module>addon</module>
   </modules>
   <dependencies>
@@ -243,8 +242,7 @@
   <properties>
     <!-- Workflow dependencies -->
     <mda.version>67</mda.version>
-    <console.version>2.8.0</console.version>
-    <mda.model>Soffid-PasswordRecover-Addon</mda.model>
+    <console.version>3.0.0-SNAPSHOT</console.version>
   </properties>
   <pluginRepositories>
     <pluginRepository>
