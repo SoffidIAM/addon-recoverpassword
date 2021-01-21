@@ -8,4 +8,6 @@ import com.soffid.mda.annotation.Enumeration;
 public class RecoverMethodEnum {
 	public String RECOVER_BY_MAIL = "mail";
 	public String RECOVER_BY_QUESTIONS = "question";
+	public String RECOVER_BY_SMS = "sms";
+	public String RECOVER_BY_OTP = "otp";
 }

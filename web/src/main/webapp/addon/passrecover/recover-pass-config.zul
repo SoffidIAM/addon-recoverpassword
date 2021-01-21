@@ -40,6 +40,14 @@
 					<customfield3 label="${c:l('recoverPass.zul.password.reuse')}" dataType="BOOLEAN" bind="@allowPasswordReuse" />
 					<customfield3 label="${c:l('recoverPass.zul.RequireQuestions')}" dataType="STRING" enumeration="com.soffid.iam.addons.passrecover.common.RequireQuestion"
 						bind="@required" required="true"/>
+
+					<customfield3 label="${c:l('rememberPass.zul.smsUrl')}" bind="@smsUrl" maxlength="250"/>
+					<customfield3 label="${c:l('rememberPass.zul.smsMethod')}"  bind="@smsMethod"  maxlength="250"/>
+					<customfield3 label="${c:l('rememberPass.zul.smsBody')}"  bind="@smsBody" maxlength="250" />
+					<customfield3 label="${c:l('rememberPass.zul.smsHeaders')}" bind="@smsHeaders" multiline="true"  maxlength="250" />
+					<customfield3 label="${c:l('rememberPass.zul.smsCheck')}" bind="@smsResponseToCheck"  maxlength="250"/>
+					<customfield3 label="${c:l('rememberPass.zul.smsAttribute')}" bind="@smsAttribute"  maxlength="250"/>
+
 					<div style="margin-top: 2em">
 						<button image="/img/save-r.svg" label="${c:l('task.filter.lblConfirmaCambios') }" onClick="ref:frame.commit"
 							style="text-align:right"/>

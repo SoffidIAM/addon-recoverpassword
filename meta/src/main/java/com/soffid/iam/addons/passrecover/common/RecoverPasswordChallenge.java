@@ -7,6 +7,8 @@
 package com.soffid.iam.addons.passrecover.common;
 import com.soffid.mda.annotation.*;
 
+import es.caib.seycon.ng.comu.Challenge;
+
 @ValueObject 
 public class RecoverPasswordChallenge {
 	@Nullable
@@ -35,4 +37,8 @@ public class RecoverPasswordChallenge {
 	@Description ("PIN sent to the user by email")
 	@Nullable
 	public String emailPin;
+	
+	@Nullable
+	@Description("OTP Challenge")
+	Challenge otpChallenge;
 }

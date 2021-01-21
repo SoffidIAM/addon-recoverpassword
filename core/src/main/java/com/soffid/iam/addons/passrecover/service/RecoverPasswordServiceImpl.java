@@ -36,6 +36,14 @@ public class RecoverPasswordServiceImpl extends RecoverPasswordServiceBase {
 	private static final String ALLOW_EMAIL_PROPERTY = "addon.retrieve.password.allow-mail";
 	private static final String ALLOW_PASSWORD_REUSE = "addon.retrieve.password.allow-reuse";
 	private static final String PREFERRED_METHOD_PROPERTY = "addon.retrieve.password.preferred-method";
+	private static final String ALLOW_SMS_PROPERTY = "addon.retrieve.password.allow-sms";
+	private static final String ALLOW_OTP_PROPERTY = "addon.retrieve.password.allow-otp";
+	private static final String SMS_ATTRIBUTE = "addon.retrieve.password.sms-attribute";
+	private static final String SMS_URL = "addon.retrieve.password.sms-url";
+	private static final String SMS_METHOD = "addon.retrieve.password.sms-methdo";
+	private static final String SMS_BODY = "addon.retrieve.password.sms-boty";
+	private static final String SMS_HEADERS = "addon.retrieve.password.sms-headers";
+	private static final String SMS_CHECK = "addon.retrieve.password.sms-check";
 	static String require = "addon.retrieve-password.require"; //$NON-NLS-1$
 	static String fillin_number = "addon.retrieve-password.fillin_number"; //$NON-NLS-1$
 	static String query_number = "addon.retrieve-password.query_number"; //$NON-NLS-1$
@@ -281,7 +289,39 @@ public class RecoverPasswordServiceImpl extends RecoverPasswordServiceBase {
 			getConfigurationService().update(toUpdate);
 		}
 
+		updateConfig ( ALLOW_OTP_PROPERTY, config.isAllowOtpRecovery(), "Allow OTP Recovery");
+		updateConfig ( ALLOW_SMS_PROPERTY, config.isAllowSmsRecovery(), "Allow SMS Recovery");
+		updateConfig ( SMS_BODY, config.getSmsBody(), "SMS Service body");
+		updateConfig ( SMS_HEADERS, config.getSmsHeaders(), "SMS Service headers");
+		updateConfig ( SMS_CHECK, config.getSmsResponseToCheck(), "SMS Service response check");
+		updateConfig ( SMS_URL, config.getSmsUrl(), "SMS Service URL");
+		updateConfig ( SMS_METHOD, config.getSmsMethod(), "SMS Service method");
+		updateConfig ( SMS_ATTRIBUTE, config.getSmsAttribute(), "SMS Service phone attribute");
+		
 		audit (null ,null, "SC_RPQUES", "G"); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	private void updateConfig(String property, Object value, String desc) throws InternalErrorException {
+		Configuration toUpdate = getConfigurationService().findParameterByNameAndNetworkName(
+				property, null);
+		if (toUpdate == null && value != null && !value.toString().trim().isEmpty()) {
+			getConfigurationService()
+					.create(new Configuration(
+							property,
+							value.toString(),
+							null,
+							"Preferred password recovery method",
+							null));
+		}
+		else if (value == null || value.toString().trim().isEmpty()) {
+			if (toUpdate != null)
+				getConfigurationService().delete(toUpdate);
+		}
+		else 
+		{
+			toUpdate.setValue(value.toString());
+			getConfigurationService().update(toUpdate);
+		}
 	}
 
 	/**
@@ -344,6 +384,35 @@ public class RecoverPasswordServiceImpl extends RecoverPasswordServiceBase {
 
 		systemConfig = ConfigurationCache.getProperty(ALLOW_PASSWORD_REUSE);
 		configuration.setAllowPasswordReuse("true".equals(systemConfig));
+
+		systemConfig = ConfigurationCache.getProperty(ALLOW_SMS_PROPERTY);
+		configuration.setAllowSmsRecovery("true".equals(systemConfig));
+
+		systemConfig = ConfigurationCache.getProperty(ALLOW_OTP_PROPERTY);
+		configuration.setAllowOtpRecovery("true".equals(systemConfig));
+
+		systemConfig = ConfigurationCache.getProperty(SMS_URL);
+		configuration.setSmsUrl( systemConfig  == null || systemConfig.trim().isEmpty() ? 
+			"https://www.ovh.com/cgi-bin/sms/http2sms.cgi?account=...&password=...&login=...&from=...&"
+			+ "to=${PHONE}&"
+			+ "message=This is your PIN for password recovery: ${PIN}&"
+			+ "noStop&contentType=application/json&class=0": 
+			systemConfig);
+
+		systemConfig = ConfigurationCache.getProperty(SMS_METHOD);
+		configuration.setSmsMethod( systemConfig  == null || systemConfig.trim().isEmpty() ? "GET": systemConfig);
+
+		systemConfig = ConfigurationCache.getProperty(SMS_BODY);
+		configuration.setSmsBody( systemConfig  == null || systemConfig.trim().isEmpty() ? "": systemConfig);
+
+		systemConfig = ConfigurationCache.getProperty(SMS_HEADERS);
+		configuration.setSmsHeaders( systemConfig  == null || systemConfig.trim().isEmpty() ? "": systemConfig);
+
+		systemConfig = ConfigurationCache.getProperty(SMS_CHECK);
+		configuration.setSmsResponseToCheck( systemConfig  == null || systemConfig.trim().isEmpty() ? "": systemConfig);
+
+		systemConfig = ConfigurationCache.getProperty(SMS_ATTRIBUTE);
+		configuration.setSmsAttribute( systemConfig  == null || systemConfig.trim().isEmpty() ? "PHONE": systemConfig);
 
 		systemConfig = ConfigurationCache.getProperty(PREFERRED_METHOD_PROPERTY);
 		if (systemConfig == null)

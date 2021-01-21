@@ -3,6 +3,12 @@
  */
 package com.soffid.iam.addons.passrecover.service;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
+import java.net.URLEncoder;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -12,18 +18,29 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
-import org.apache.commons.logging.LogFactory;
+import javax.ws.rs.core.Cookie;
+import javax.ws.rs.core.Form;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
-import com.soffid.iam.addons.passrecover.common.MissconfiguredRecoverException;
-import com.soffid.iam.addons.passrecover.common.RecoverMethodEnum;
-import com.soffid.iam.addons.passrecover.common.RecoverPassConfig;
-import com.soffid.iam.addons.passrecover.common.RecoverPasswordChallenge;
-import com.soffid.iam.addons.passrecover.common.UserAnswer;
+import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.commons.logging.LogFactory;
+import org.apache.cxf.jaxrs.client.WebClient;
+import org.apache.http.HttpStatus;
+
+import com.soffid.iam.ServiceLocator;
+import com.soffid.iam.addons.rememberPassword.common.MissconfiguredRecoverException;
+import com.soffid.iam.addons.rememberPassword.common.RecoverMethodEnum;
+import com.soffid.iam.addons.rememberPassword.common.RememberPassConfig;
+import com.soffid.iam.addons.rememberPassword.common.RememberPasswordChallenge;
+import com.soffid.iam.addons.rememberPassword.common.UserAnswer;
 import com.soffid.iam.api.Account;
 import com.soffid.iam.api.Audit;
+import com.soffid.iam.api.Challenge;
 import com.soffid.iam.api.PasswordValidation;
 import com.soffid.iam.api.PolicyCheckResult;
 import com.soffid.iam.api.SoffidObjectType;
+import com.soffid.iam.api.User;
 import com.soffid.iam.api.UserAccount;
 import com.soffid.iam.model.AccountEntity;
 import com.soffid.iam.model.AuditEntity;
@@ -91,22 +108,34 @@ public class RecoverPasswordUserServiceImpl extends
 			RecoverPasswordChallenge stored = getStoredChallenge(challenge);
       if (stored==null)
 			  return false;
-			for (UserAnswer answer : stored.getQuestions()) {
-				for (UserAnswer answer2 : challenge.getQuestions()) {
-					if (answer.getQuestion().replaceAll("\\?",  "").equals(answer2.getQuestion().replaceAll("\\?",  ""))) {
-						answer.setAnswer(answer2.getAnswer());
-						break;
+      
+			if (stored.getMethod() == RecoverMethodEnum.RECOVER_BY_OTP) {
+				UserAnswer answer = challenge.getQuestions().iterator().next();
+				if (getOTPValidationService().validatePin(stored.getOtpChallenge(), answer.getAnswer())) {
+					stored.setAnswered(true);
+					return true;
+				}
+				else
+					return false;
+			} else {
+				for (UserAnswer answer : stored.getQuestions()) {
+					for (UserAnswer answer2 : challenge.getQuestions()) {
+						if (answer.getQuestion().replaceAll("\\?",  "").equals(answer2.getQuestion().replaceAll("\\?",  ""))) {
+							answer.setAnswer(answer2.getAnswer());
+							break;
+						}
 					}
 				}
+				
+				// Verify answers
+				if (verifyAnswers(stored)) {
+					audit (stored.getUser(), null, "SC_RPANSW", "S", null); //$NON-NLS-1$ //$NON-NLS-2$
+					stored.setAnswered(true);
+					return true;
+				} else
+					return false;
 			}
 	
-			// Verify answers
-			if (verifyAnswers(stored)) {
-				audit (stored.getUser(), null, "SC_RPANSW", "S", null); //$NON-NLS-1$ //$NON-NLS-2$
-				stored.setAnswered(true);
-				return true;
-			} else
-				return false;
 		} finally {
 			Security.nestedLogoff();
 		}
@@ -125,7 +154,8 @@ public class RecoverPasswordUserServiceImpl extends
 
 
 		Collection<UserAnswer> userAnswers ;
-		if (stored.getMethod().equals (RecoverMethodEnum.RECOVER_BY_MAIL))
+		if (stored.getMethod().equals (RecoverMethodEnum.RECOVER_BY_MAIL) ||
+				stored.getMethod().equals (RecoverMethodEnum.RECOVER_BY_SMS))
 		{
 			toAnswer = 1;
 			userAnswers = new LinkedList<UserAnswer>();
@@ -288,7 +318,7 @@ public class RecoverPasswordUserServiceImpl extends
 		 
 	}
 
-	private RecoverMethodEnum guessRecoveryMethod(String user) throws InternalErrorException {
+	private RecoverMethodEnum guessRecoveryMethod(String user, RecoverPasswordChallenge challenge) throws InternalErrorException {
 		RecoverPassConfig config = getRecoverPasswordService().getRecoverPassConfiguration();
 		
 		if (config.getPreferredMethod().equals (RecoverMethodEnum.RECOVER_BY_MAIL))
@@ -298,26 +328,82 @@ public class RecoverPasswordUserServiceImpl extends
 				return RecoverMethodEnum.RECOVER_BY_MAIL;
 			else if (hasQuestions (user) && config.isAllowQuestionRecovery())
 				return RecoverMethodEnum.RECOVER_BY_QUESTIONS;
+			else if (config.isAllowSmsRecovery() && hasSms(user, config))
+				return RecoverMethodEnum.RECOVER_BY_SMS;
+			else if (config.isAllowOtpRecovery() && hasToken(user, challenge))
+				return RecoverMethodEnum.RECOVER_BY_OTP;
 			else
 				return null;
 		}
-		else
+		else if (config.getPreferredMethod().equals (RecoverMethodEnum.RECOVER_BY_QUESTIONS))
 		{
 //			log.info("Preferred questions");
 			if (hasQuestions (user) && config.isAllowQuestionRecovery())
 				return RecoverMethodEnum.RECOVER_BY_QUESTIONS;
 			else if (hasRecoveryEmail (user) && config.isAllowMailRecovery())
 				return RecoverMethodEnum.RECOVER_BY_MAIL;
+			else if (config.isAllowSmsRecovery() && hasSms(user, config))
+				return RecoverMethodEnum.RECOVER_BY_SMS;
+			else if (config.isAllowOtpRecovery() && hasToken(user, challenge))
+				return RecoverMethodEnum.RECOVER_BY_OTP;
+			else
+				return null;
+		}
+		else if (config.getPreferredMethod().equals (RecoverMethodEnum.RECOVER_BY_SMS))
+		{
+//			log.info("Preferred sms");
+			if (config.isAllowSmsRecovery() && hasSms(user, config))
+				return RecoverMethodEnum.RECOVER_BY_SMS;
+			else if (hasQuestions (user) && config.isAllowQuestionRecovery())
+				return RecoverMethodEnum.RECOVER_BY_QUESTIONS;
+			else if (hasRecoveryEmail (user) && config.isAllowMailRecovery())
+				return RecoverMethodEnum.RECOVER_BY_MAIL;
+			else if (config.isAllowOtpRecovery() && hasToken(user, challenge))
+				return RecoverMethodEnum.RECOVER_BY_OTP;
+			else
+				return null;
+		}
+		else
+		{
+//			log.info("Preferred otp");
+			if (config.isAllowOtpRecovery() && hasToken(user, challenge))
+				return RecoverMethodEnum.RECOVER_BY_OTP;
+			else if (hasQuestions (user) && config.isAllowQuestionRecovery())
+				return RecoverMethodEnum.RECOVER_BY_QUESTIONS;
+			else if (hasRecoveryEmail (user) && config.isAllowMailRecovery())
+				return RecoverMethodEnum.RECOVER_BY_MAIL;
+			else if (config.isAllowSmsRecovery() && hasSms(user, config))
+				return RecoverMethodEnum.RECOVER_BY_SMS;
 			else
 				return null;
 		}
 			
 	}
-
+	
 	private boolean hasRecoveryEmail(String user) {
 		String email = getRecoveryEmail (user);
 		return email != null && !email.trim().isEmpty();
 	}
+
+	private boolean hasToken(String user, RememberPasswordChallenge challenge) throws InternalErrorException {
+		Challenge ch = new Challenge();
+		ch.setUser(getUserService().findUserByUserName(user));
+		Challenge token = getOTPValidationService().selectToken(ch);
+		challenge.setOtpChallenge(token);
+		return token.getCardNumber() != null;
+	}
+
+	private boolean hasSms(String user, RememberPassConfig config) {
+		if (config.getSmsAttribute() == null)
+			return false;
+		for (UserDataEntity att: getUserDataEntityDao().findByDataType(user, config.getSmsAttribute())) {
+			String v = att.getValue();
+			if (v != null && !v.trim().isEmpty())
+				return true;
+		}
+		return false;
+	}
+
 
 	private String getRecoveryEmail(String user) {
 		UserEntity userEntity = getUserEntityDao().findByUserName(user);
@@ -420,6 +506,120 @@ public class RecoverPasswordUserServiceImpl extends
 		return requestQuestions;
 	}
 
+	private Collection<UserAnswer> generateSms(RememberPasswordChallenge challenge, String user) throws InternalErrorException, IOException {
+		Random rand = new Random();
+		StringBuffer sb = new StringBuffer();
+		for (int i = 0; i < 8; i++)
+		{
+			sb.append ( (char) ('0'+rand.nextInt(10)));
+		}
+		Collection<UserAnswer> requestQuestions = new LinkedList<UserAnswer>();
+
+		UserAnswer answer = new UserAnswer();
+		answer.setId(new Long(0));
+		answer.setQuestion(Messages.getString("RememberPasswordUserServiceImpl.SMSQuestion")); //$NON-NLS-1$
+		answer.setUser(user);
+		answer.setAnswer(sb.toString());
+		requestQuestions.add(answer);
+		
+		challenge.setEmailPin(sb.toString());
+		challenge.setUser(user);
+		
+		RememberPassConfig cfg = getRememberPasswordService().getRememberPassConfiguration();
+		WebClient request = WebClient.create(translate(cfg.getSmsUrl(), challenge));
+		if (cfg.getSmsHeaders() != null) {
+			for (String line: cfg.getSmsHeaders().split("\n")) {
+				line = line.trim();
+				if ( !line.isEmpty()) {
+					int i = line.indexOf(':');
+					String tag = line.substring(0,i).trim();
+					String value = line.substring(i+1).trim();
+					if (!tag.isEmpty() && !value.isEmpty()) {
+						request.header(tag, value);
+					}
+				}
+			}
+		}
+		log.info("Sending message to "+challenge.getUser());
+		Response response = request.invoke(cfg.getSmsMethod(), translate(cfg.getSmsBody(), challenge));
+
+		if ( response.getStatus() != HttpStatus.SC_OK)
+			throw new InternalError ("Error sending SMS message: HTTP/"+response.getStatus());
+		InputStream in = (InputStream) response.getEntity();
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		int read;
+		while ((read = in.read()) >= 0)
+			out.write(read);
+		log.info("SMS gateway response: "+out.toString("UTF-8"));
+		if ( cfg.getSmsResponseToCheck() != null) {
+			if (!out.toString("UTF-8").contains(cfg.getSmsResponseToCheck()))
+				throw new InternalErrorException("Cannot send SMS message");
+		}
+		return requestQuestions;
+		
+	}
+
+	private String translate(String smsBody, RememberPasswordChallenge challenge) throws UnsupportedEncodingException {
+		StringBuffer b = new StringBuffer();
+		int pos = 0;
+		do {
+			int next = smsBody.indexOf("${", pos);
+			if (next < 0) { 
+				b.append(smsBody.substring(pos));
+				break;
+			} else {
+				int last = smsBody.indexOf("}", pos);
+				if (last < 0) {
+					b.append(smsBody.substring(pos));
+					break;
+				}
+				String tag = smsBody.substring(next+2, last);
+				Object value = eval (tag, challenge);
+				b.append(smsBody.substring(pos, next));
+				if (value != null) 
+					b.append( URLEncoder.encode(value.toString(), "UTF-8"));
+				pos = last + 1;
+			}
+		} while (true);
+		return b.toString();
+	}
+
+
+	private Object eval(String tag, RememberPasswordChallenge challenge) {
+		Object value = null;
+		
+		if (tag.equals("PIN"))
+			return challenge.getEmailPin();
+		Collection<UserDataEntity> list = getUserDataEntityDao().findByDataType(challenge.getUser(), tag);
+		if (list.isEmpty()) {
+			UserEntity userEntity = getUserEntityDao().findByUserName(challenge.getUser());
+			if (userEntity != null) {
+				User user = getUserEntityDao().toUser(userEntity);
+				try {
+					value = PropertyUtils.getProperty(user, tag);
+				} catch (Exception e) {
+				}
+			}
+		} else {
+			value = list.iterator().next().getObjectValue();
+		}
+		return value;
+	}
+
+	private Collection<UserAnswer> generateOtp(RememberPasswordChallenge challenge, String user) throws InternalErrorException, UnsupportedEncodingException {
+		Random rand = new Random();
+		Collection<UserAnswer> requestQuestions = new LinkedList<UserAnswer>();
+
+		UserAnswer answer = new UserAnswer();
+		answer.setId(new Long(0));
+		answer.setQuestion(Messages.getString("RememberPasswordUserServiceImpl.OTPQuestion")+challenge.getOtpChallenge().getCardNumber() ); //$NON-NLS-1$
+		answer.setUser(user);
+		answer.setAnswer(user);
+		requestQuestions.add(answer);
+		
+		return requestQuestions;
+	}
+
 	/**
 	 * @param userAnswers
 	 * @param request 
@@ -477,7 +677,7 @@ public class RecoverPasswordUserServiceImpl extends
 		try {
 			RecoverPasswordChallenge challenge = new RecoverPasswordChallenge();
 	
-			challenge.setMethod(guessRecoveryMethod (user));
+			challenge.setMethod(guessRecoveryMethod (user, challenge));
 			
 			if (challenge.getMethod() == null)
 				throw new MissconfiguredRecoverException(
@@ -509,8 +709,12 @@ public class RecoverPasswordUserServiceImpl extends
 				challenge.setExpirationDate(date);
 				if (challenge.getMethod().equals(RecoverMethodEnum.RECOVER_BY_QUESTIONS))
 					challenge.setQuestions(generateQuestions(user));
-				else
+				else if (challenge.getMethod().equals(RecoverMethodEnum.RECOVER_BY_MAIL))
 					challenge.setQuestions(generateEmail(challenge, user));
+				else if (challenge.getMethod().equals(RecoverMethodEnum.RECOVER_BY_SMS))
+					challenge.setQuestions(generateSms(challenge, user));
+				else if (challenge.getMethod().equals(RecoverMethodEnum.RECOVER_BY_OTP))
+					challenge.setQuestions(generateOtp(challenge, user));
 				challenge.setUser(user);
 				challenge.setChallengId(new Long(challenge.hashCode()));
 				synchronized (challenges) {

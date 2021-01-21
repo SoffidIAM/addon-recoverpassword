@@ -27,6 +27,27 @@ public class RecoverPassConfig {
 	
 	public boolean allowPasswordReuse;
 	
+	public boolean allowOtpRecovery;
+	
+	public boolean allowSmsRecovery;
+	
 	public RecoverMethodEnum preferredMethod ;
+	
+	@Nullable
+	public String smsAttribute;
 
+	@Nullable
+	public String smsUrl;
+	
+	@Nullable
+	public String smsMethod;
+	
+	@Nullable
+	public String smsBody;
+	
+	@Nullable
+	public String smsHeaders;
+
+	@Nullable
+	public String smsResponseToCheck;
 }
