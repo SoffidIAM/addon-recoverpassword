@@ -283,5 +283,11 @@
       <scope>provided</scope>
       <optional>true</optional>
     </dependency>
+    <dependency>
+    	<groupId>org.apache.cxf</groupId>
+    	<artifactId>cxf-rt-rs-client</artifactId>
+    	<version>3.1.10</version>
+    	<scope>provided</scope>
+    </dependency>
   </dependencies>
 </project>

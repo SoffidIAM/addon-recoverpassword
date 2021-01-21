@@ -7,12 +7,16 @@
 package com.soffid.iam.addons.rememberPassword.service;
 import com.soffid.iam.addons.rememberPassword.common.MissconfiguredRecoverException;
 import com.soffid.iam.service.MailService;
+import com.soffid.iam.service.OTPValidationService;
 import com.soffid.mda.annotation.*;
 
 import es.caib.seycon.ng.exception.BadPasswordException;
 import es.caib.seycon.ng.exception.UnknownUserException;
+import es.caib.seycon.ng.model.DadaUsuariEntity;
 import es.caib.seycon.ng.model.ServerEntity;
 import es.caib.seycon.ng.servei.AccountService;
+import es.caib.seycon.ng.servei.DadesAddicionalsService;
+import es.caib.seycon.ng.servei.UsuariService;
 
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +31,10 @@ import org.springframework.transaction.annotation.Transactional;
 	es.caib.seycon.ng.model.DispatcherEntity.class,
 	com.soffid.iam.addons.rememberPassword.common.RememberPasswordChallenge.class,
 	AccountService.class,
+	UsuariService.class,
+	DadesAddicionalsService.class,
+	DadaUsuariEntity.class,
+	OTPValidationService.class,
 	ServerEntity.class,
 	MailService.class})
 public abstract class RememberPasswordUserService {
