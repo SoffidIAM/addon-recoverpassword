@@ -7,6 +7,8 @@
 package com.soffid.iam.addons.rememberPassword.service;
 import com.soffid.mda.annotation.*;
 
+import es.caib.seycon.ng.servei.DadesAddicionalsService;
+
 import org.springframework.transaction.annotation.Transactional;
 
 @Service ( translatedName="RememberPasswordService",

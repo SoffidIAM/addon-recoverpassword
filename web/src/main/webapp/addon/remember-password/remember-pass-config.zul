@@ -89,14 +89,26 @@
 								<checkbox bind="@allowQuestionRecovery" />
 							</row>
 							<row>
+								<label sclass="label" value="${c:l('rememberPass.zul.EnableSms')}" />
+								<checkbox bind="@allowSmsRecovery" />
+							</row>
+							<row>
+								<label sclass="label" value="${c:l('rememberPass.zul.EnableOtp')}" />
+								<checkbox bind="@allowOtpRecovery" />
+							</row>
+							<row>
 								<label value="${c:l('rememberPass.zul.PreferredMethod')}" />
 								<zscript><![CDATA[
 									mailMethod=com.soffid.iam.addons.rememberPassword.common.RecoverMethodEnum.RECOVER_BY_MAIL;
 									questionMethod=com.soffid.iam.addons.rememberPassword.common.RecoverMethodEnum.RECOVER_BY_QUESTIONS;
+									otpMethod=com.soffid.iam.addons.rememberPassword.common.RecoverMethodEnum.RECOVER_BY_OTP;
+									smsMethod=com.soffid.iam.addons.rememberPassword.common.RecoverMethodEnum.RECOVER_BY_SMS;
 								]]></zscript>
 								<listbox id="requireQuestion" bind="@preferredMethod" mold="select">
 									<listitem value="${mailMethod}"><listcell label="${c:l('rememberPass.zul.method.mail')}"/></listitem>
 									<listitem value="${questionMethod}"><listcell label="${c:l('rememberPass.zul.method.question')}"/></listitem>
+									<listitem value="${otpMethod}"><listcell label="${c:l('rememberPass.zul.method.otp')}"/></listitem>
+									<listitem value="${smsMethod}"><listcell label="${c:l('rememberPass.zul.method.sms')}"/></listitem>
 								</listbox>
 							</row>
 							<row>
@@ -126,10 +138,38 @@
 								<label sclass="label" value="${c:l('rememberPass.zul.RightQuestions')}" />
 								<textbox id="questions_right_number" width="4em" bind="@right" />
 							</row>
+							
+							<row>
+								<label sclass="label" value="${c:l('rememberPass.zul.smsUrl')}" />
+								<textbox id="smsUrl" width="100%" bind="@smsUrl" />
+							</row>
+							<row>
+								<label sclass="label" value="${c:l('rememberPass.zul.smsMethod')}" />
+								<textbox id="smsMethod" width="100%" bind="@smsMethod" />
+							</row>
+							<row>
+								<label sclass="label" value="${c:l('rememberPass.zul.smsBody')}" />
+								<textbox id="smsBody" width="100%" bind="@smsBody" />
+							</row>
+							<row>
+								<label sclass="label" value="${c:l('rememberPass.zul.smsHeaders')}" />
+								<textbox id="smsHeaders" width="100%" bind="@smsHeaders" multiline="true" rows="4" />
+							</row>
+							<row>
+								<label sclass="label" value="${c:l('rememberPass.zul.smsCheck')}" />
+								<textbox width="100%" bind="@smsResponseToCheck" />
+							</row>
+							<row>
+								<label sclass="label" value="${c:l('rememberPass.zul.smsAttribute')}" />
+								<textbox id="smsAttribute" width="100%" bind="@smsAttribute" />
+							</row>
+							
 							<row>
 								<label sclass="label" value="${c:l('rememberPass.zul.password.reuse')}" />
 								<checkbox bind="@allowPasswordReuse" />
 							</row>
+							
+							
 							<row>
 								<label />
 								<button label="${c:l('rememberPass.zul.Update')}"
