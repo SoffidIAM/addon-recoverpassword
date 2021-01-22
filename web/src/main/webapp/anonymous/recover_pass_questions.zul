@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?page id="recover_pass_questions" title="User recover password questions"?>
+<?taglib uri="/WEB-INF/tld/web/core.dsp.tld" prefix="c" ?>
+<?link rel="icon" href="/anonymous/favicon.png" sizes="any" type="image/png"?>
+<zk>
+	<style src="/css/login.css" />
+	<style>
+		div.login {
+			width: 550px;
+		}
+		.qa table input {
+			margin: 0;
+		}
+		.qa table span {
+		    margin-top: 5px;
+		    display: inline-block;
+		    color: black;
+		}
+	</style>
+	<div xmlns:h="http://www.w3.org/1999/xhtml" sclass="login" use="com.soffid.iam.addon.passrecover.web.RecoverPasswordHandler" id="frame">
+		<datamodel id="model" rootNode="challenge"
+			src="addon/passrecover/descResetPassword.xml" />
+	
+		<image src="/anonymous/logo.png" style="max-width: 250px; max-height: 125px;"/>
+        <image src="/anonymous/logo - iam-orig.svg" style="width: 250px; height: 125px;"/> 
+	
+		
+		<div id="user_code_req" visible="true" class="loginbox">
+			<label value="${c:l('recoverPass.zul.IdentifyMessage')}"/>
+			
+			<separator/>
+			
+			<div>
+				<label id="label_user" value="${c:l('recoverPass.zul.User')}"/>
+				<textbox id="txt_user" focus="true" onOK="ref:frame.show_user_questions();"/>
+			</div>
+			
+			<separator/>
+			
+			<button id="show_remember_password_questions"
+				label="${c:l('recoverPass.Titol')}" onClick='ref:frame.show_user_questions()'/>
+			<button id="cancel_button" label="${c:l('recoverPass.zul.Cancel')}" onClick="ref:frame.cancel">
+			</button>
+		</div>
+	
+		<div id="user_questions" visible="false">
+			<label value="${c:l('recoverPass.zul.AnswerQuestionMsg')}"/>
+			<grid id="grid_user_answers" sclass="qa">
+				<columns>
+					<column label="${c:l('recoverPass.zul.Question2')}"/>
+					<column label="${c:l('recoverPass.zul.Answer')}" />
+				</columns>
+				<rows/>
+			</grid>
+			
+			<button 
+				label="${c:l('recoverPass.zul.Recover')}" onClick="ref:frame.answerQuestions()">
+			</button>
+	
+			<button id="save_remember_password"
+				label="${c:l('recoverPass.zul.Close')}" onClick="ref:frame.cancel">
+			</button>
+		</div>
+		<div width="100%" style="margin-top: 10px" id="resetPassword" visible="false">
+			<div style="padding-bottom:5px; width: 100%">
+				<label value="${c:l('login.lblUser')}: "/>
+				<label style="text-weigth:bold;" id="userName"/>
+			</div> 
+			<textbox id="passnueva1" style="width:100%" onOK="ref:frame.gopassnueva2" type="password" placeholder="${c:l('changepass.zul.Novacontrasenya') }"/>
+			<textbox id="passnueva2" style="width:100%"  onOK="ref:frame.changepass()" type="password"  placeholder="${c:l('changepass.zul.Repeticianovacontras') }"/>
+			
+			<div align="center" class="botonera">
+				<hbox align="center" style="margin: 0 auto;">
+					<button label="${c:l('changepass.zul.Acceptar')}" onClick="ref:frame.changepass">
+					</button>
+					
+					<button label="${c:l('changepass.zul.Cancel')}" onClick="ref:frame.cancel">
+					</button>
+				</hbox>
+			</div>
+			<html style="text-align: left" id="policy"/>
+		</div>
+	</div>
+</zk>

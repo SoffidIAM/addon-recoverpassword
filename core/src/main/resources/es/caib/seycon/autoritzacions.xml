@@ -16,45 +16,45 @@
 
 <autoritzacions>
 	<autoritzacio>
-		<codi>remember-password:create</codi>
+		<codi>recover-password:create</codi>
 		<descripcio>Create recover password entries</descripcio>
-		<ambit>Remember password</ambit>
+		<ambit>Recover password</ambit>
 		<hereta>
-			remember-password:query,
-			remember-password:update
+			recover-password:query,
+			recover-password:update
 		</hereta>
 	</autoritzacio>
 
 	<autoritzacio>
-		<codi>remember-password:update</codi>
+		<codi>recover-password:update</codi>
 		<descripcio>Update recover password entries</descripcio>
-		<ambit>Remember password</ambit>
+		<ambit>Recover password</ambit>
 		<hereta>
-			remember-password:query
+			recover-password:query
 		</hereta>
 	</autoritzacio>
 
 	<autoritzacio>
-		<codi>remember-password:delete</codi>
+		<codi>recover-password:delete</codi>
 		<descripcio>Delete recover password entries</descripcio>
-		<ambit>Remember password</ambit>
+		<ambit>Recover password</ambit>
 		<hereta>
-			remember-password:query
+			recover-password:query
 		</hereta>
 	</autoritzacio>
 
 	<autoritzacio>
-		<codi>remember-password:query</codi>
+		<codi>recover-password:query</codi>
 		<descripcio>See recover password entries</descripcio>
-		<ambit>Remember password</ambit>
+		<ambit>Recover password</ambit>
 	</autoritzacio>
 
 	<autoritzacio>
-		<codi>seu:remember-password:show</codi>
+		<codi>seu:recover-password:show</codi>
 		<descripcio>Access to recover password window</descripcio>
 		<ambit>Soffid</ambit>
 		<hereta>
-			remember-password:query
+			recover-password:query
 		</hereta>
 	</autoritzacio>
 </autoritzacions>

@@ -2,12 +2,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <parent>
     <artifactId>root</artifactId>
-    <groupId>com.soffid.iam.addon.remember-password</groupId>
-    <version>2.1.1-SNAPSHOT</version>
+    <groupId>com.soffid.iam.addon.recover-password</groupId>
+    <version>2.0.4-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>remember-password-common</artifactId>
-  <name>Retrieve password Common module</name>
+  <artifactId>recover-password-common</artifactId>
+  <name>Recover password Common module</name>
   <properties>
     <maven.compile.source>1.6</maven.compile.source>
     <maven.compile.target>1.6</maven.compile.target>

@@ -1,0 +1,12 @@
+- name: soffid.admin
+  img: /img/menu/laboratory.svg
+  options:
+  - name: seu.configuration
+    options:
+    - name: seu.security
+      options:
+      - name: recoverPass.Configuration
+        url: /addon/passrecover/recover-pass-config.zul
+        img: /addon/passrecover/menu.svg
+        permissions: ["seu:recover-password:show"]
+            

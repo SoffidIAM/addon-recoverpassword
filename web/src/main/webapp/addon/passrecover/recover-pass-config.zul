@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?page id="recover-password" title="Retrieve password manager"?>
+<?taglib uri="/WEB-INF/tld/web/core.dsp.tld" prefix="c" ?>
+<?component name="input_dada" macro-uri="/comu/input_dada.zul"?>
+<?component name="input_etiqueta" macro-uri="/comu/input_etiqueta.zul"?>
+<frame xmlns:h="http://www.w3.org/1999/xhtml" use="com.soffid.iam.addon.passrecover.web.ConfigurationHandler"
+	> 
+	
+	<style>
+	div.databox div.container {
+	    width: calc(100% - 400px);
+	}
+	div.databox div.label, div.databox.databox_switch div.label {
+		min-width: 392px;
+	}
+	</style>
+	<datamodel id="model" rootNode="recover-password"
+		src="addon/passrecover/descPasswordRecovery.xml" />
+
+	<div use="com.soffid.iam.web.component.NavigationBar" frame="frame">
+	</div>
+
+	<tabbox id="panels">
+		<tabs>
+			<tab label="${c:l('recoverPass.Titol')}" width="${tabWith}" />
+			<tab label="${c:l('recoverPass.zul.DefaultQuestions')}"
+				width="${tabWith}" />
+		</tabs>
+
+		<tabpanels>
+			<tabpanel id="recoverPass_config">
+				<form id="form" dataPath="/model:/configuration" width="100%">
+					<customfield3 label="${c:l('recoverPass.zul.EnableEmail')}" dataType="BOOLEAN" bind="@allowMailRecovery" />
+					<customfield3 label="${c:l('recoverPass.zul.EnableQuestion')}" dataType="BOOLEAN" bind="@allowQuestionRecovery" />
+					<customfield3 label="${c:l('recoverPass.zul.EnableOtp')}" dataType="BOOLEAN" bind="@allowOtpRecovery" />
+					<customfield3 label="${c:l('recoverPass.zul.EnableSms')}" dataType="BOOLEAN" bind="@allowSmsRecovery" />
+					<customfield3 label="${c:l('recoverPass.zul.PreferredMethod')}" dataType="STRING" enumeration="com.soffid.iam.addons.passrecover.common.RecoverMethodEnum"
+						bind="@preferredMethod" required="true"/>
+					<customfield3 label="${c:l('recoverPass.zul.NumberOfQuestionsToFill')}" dataType="NUMBER" id="fillin_number" maxlength="5" bind="@number" />
+					<customfield3 label="${c:l('recoverPass.zul.NumberOfQuestions')}" dataType="NUMBER" id="questions_number" maxlength="5" bind="@questions" />
+					<customfield3 label="${c:l('recoverPass.zul.RightQuestions')}" dataType="NUMBER" id="questions_right_number" maxlength="5" bind="@right" />
+					<customfield3 label="${c:l('recoverPass.zul.password.reuse')}" dataType="BOOLEAN" bind="@allowPasswordReuse" />
+					<customfield3 label="${c:l('recoverPass.zul.RequireQuestions')}" dataType="STRING" enumeration="com.soffid.iam.addons.passrecover.common.RequireQuestion"
+						bind="@required" required="true"/>
+
+					<customfield3 label="${c:l('recoverPass.zul.smsUrl')}" bind="@smsUrl" maxlength="250"/>
+					<customfield3 label="${c:l('recoverPass.zul.smsMethod')}"  bind="@smsMethod"  maxlength="250"/>
+					<customfield3 label="${c:l('recoverPass.zul.smsBody')}"  bind="@smsBody" maxlength="250" />
+					<customfield3 label="${c:l('recoverPass.zul.smsHeaders')}" bind="@smsHeaders" multiline="true"  maxlength="250" />
+					<customfield3 label="${c:l('recoverPass.zul.smsCheck')}" bind="@smsResponseToCheck"  maxlength="250"/>
+					<customfield3 label="${c:l('recoverPass.zul.smsAttribute')}" bind="@smsAttribute"  maxlength="250"/>
+
+					<div style="margin-top: 2em">
+						<button image="/img/save-r.svg" label="${c:l('task.filter.lblConfirmaCambios') }" onClick="ref:frame.commit"
+							style="text-align:right"/>
+					</div>
+				</form>
+			</tabpanel>
+			<tabpanel id="defaultQuestions">
+				<datatable id="listbox" autocommit="false"
+							dataPath="/model:/default_questions"
+							sortColumn="0"
+							onChangeQuestion="ref:frame.changeQuestion"
+							onRemove="ref:frame.removeQuestion"
+							enablefilter="false"
+							updateRowEvent="false"
+							maxheight="60vh"> 
+				<attribute name="columns"><![CDATA[
+- name: ${c:l('recoverPass.zul.Question2') }
+  value: question
+  template: <input type="text" style="width: 100%; border: none" value="#{question }" onInput="zkDatatable.sendClientAction(this, 'onChangeQuestion', [event.target.value])"/>
+- name: ""
+  sort: false
+  className: selector
+  template: <img src="${execution.contextPath }/img/remove.svg" class="imageclic" onClick="zkDatatable.sendClientAction(this, 'onRemove')"/>
+				]]> </attribute>
+
+				</datatable>
+				<div width="100%" style="text-align: right" >
+					<div class="addButton" onClick="ref:frame.addNew">+</div>
+				</div>
+			</tabpanel>
+		</tabpanels>
+	</tabbox>
+</frame>
