@@ -32,6 +32,8 @@
 				<form id="form" dataPath="/model:/configuration" width="100%">
 					<customfield3 label="${c:l('recoverPass.zul.EnableEmail')}" dataType="BOOLEAN" bind="@allowMailRecovery" />
 					<customfield3 label="${c:l('recoverPass.zul.EnableQuestion')}" dataType="BOOLEAN" bind="@allowQuestionRecovery" />
+					<customfield3 label="${c:l('recoverPass.zul.EnableOtp')}" dataType="BOOLEAN" bind="@allowOtpRecovery" />
+					<customfield3 label="${c:l('recoverPass.zul.EnableSms')}" dataType="BOOLEAN" bind="@allowSmsRecovery" />
 					<customfield3 label="${c:l('recoverPass.zul.PreferredMethod')}" dataType="STRING" enumeration="com.soffid.iam.addons.passrecover.common.RecoverMethodEnum"
 						bind="@preferredMethod" required="true"/>
 					<customfield3 label="${c:l('recoverPass.zul.NumberOfQuestionsToFill')}" dataType="NUMBER" id="fillin_number" maxlength="5" bind="@number" />
@@ -41,12 +43,12 @@
 					<customfield3 label="${c:l('recoverPass.zul.RequireQuestions')}" dataType="STRING" enumeration="com.soffid.iam.addons.passrecover.common.RequireQuestion"
 						bind="@required" required="true"/>
 
-					<customfield3 label="${c:l('rememberPass.zul.smsUrl')}" bind="@smsUrl" maxlength="250"/>
-					<customfield3 label="${c:l('rememberPass.zul.smsMethod')}"  bind="@smsMethod"  maxlength="250"/>
-					<customfield3 label="${c:l('rememberPass.zul.smsBody')}"  bind="@smsBody" maxlength="250" />
-					<customfield3 label="${c:l('rememberPass.zul.smsHeaders')}" bind="@smsHeaders" multiline="true"  maxlength="250" />
-					<customfield3 label="${c:l('rememberPass.zul.smsCheck')}" bind="@smsResponseToCheck"  maxlength="250"/>
-					<customfield3 label="${c:l('rememberPass.zul.smsAttribute')}" bind="@smsAttribute"  maxlength="250"/>
+					<customfield3 label="${c:l('recoverPass.zul.smsUrl')}" bind="@smsUrl" maxlength="250"/>
+					<customfield3 label="${c:l('recoverPass.zul.smsMethod')}"  bind="@smsMethod"  maxlength="250"/>
+					<customfield3 label="${c:l('recoverPass.zul.smsBody')}"  bind="@smsBody" maxlength="250" />
+					<customfield3 label="${c:l('recoverPass.zul.smsHeaders')}" bind="@smsHeaders" multiline="true"  maxlength="250" />
+					<customfield3 label="${c:l('recoverPass.zul.smsCheck')}" bind="@smsResponseToCheck"  maxlength="250"/>
+					<customfield3 label="${c:l('recoverPass.zul.smsAttribute')}" bind="@smsAttribute"  maxlength="250"/>
 
 					<div style="margin-top: 2em">
 						<button image="/img/save-r.svg" label="${c:l('task.filter.lblConfirmaCambios') }" onClick="ref:frame.commit"

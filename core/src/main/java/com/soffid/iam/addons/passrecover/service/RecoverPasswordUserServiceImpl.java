@@ -29,11 +29,11 @@ import org.apache.cxf.jaxrs.client.WebClient;
 import org.apache.http.HttpStatus;
 
 import com.soffid.iam.ServiceLocator;
-import com.soffid.iam.addons.rememberPassword.common.MissconfiguredRecoverException;
-import com.soffid.iam.addons.rememberPassword.common.RecoverMethodEnum;
-import com.soffid.iam.addons.rememberPassword.common.RememberPassConfig;
-import com.soffid.iam.addons.rememberPassword.common.RememberPasswordChallenge;
-import com.soffid.iam.addons.rememberPassword.common.UserAnswer;
+import com.soffid.iam.addons.passrecover.common.MissconfiguredRecoverException;
+import com.soffid.iam.addons.passrecover.common.RecoverMethodEnum;
+import com.soffid.iam.addons.passrecover.common.RecoverPassConfig;
+import com.soffid.iam.addons.passrecover.common.RecoverPasswordChallenge;
+import com.soffid.iam.addons.passrecover.common.UserAnswer;
 import com.soffid.iam.api.Account;
 import com.soffid.iam.api.Audit;
 import com.soffid.iam.api.Challenge;
@@ -385,7 +385,7 @@ public class RecoverPasswordUserServiceImpl extends
 		return email != null && !email.trim().isEmpty();
 	}
 
-	private boolean hasToken(String user, RememberPasswordChallenge challenge) throws InternalErrorException {
+	private boolean hasToken(String user, RecoverPasswordChallenge challenge) throws InternalErrorException {
 		Challenge ch = new Challenge();
 		ch.setUser(getUserService().findUserByUserName(user));
 		Challenge token = getOTPValidationService().selectToken(ch);
@@ -393,7 +393,7 @@ public class RecoverPasswordUserServiceImpl extends
 		return token.getCardNumber() != null;
 	}
 
-	private boolean hasSms(String user, RememberPassConfig config) {
+	private boolean hasSms(String user, RecoverPassConfig config) {
 		if (config.getSmsAttribute() == null)
 			return false;
 		for (UserDataEntity att: getUserDataEntityDao().findByDataType(user, config.getSmsAttribute())) {
@@ -506,7 +506,7 @@ public class RecoverPasswordUserServiceImpl extends
 		return requestQuestions;
 	}
 
-	private Collection<UserAnswer> generateSms(RememberPasswordChallenge challenge, String user) throws InternalErrorException, IOException {
+	private Collection<UserAnswer> generateSms(RecoverPasswordChallenge challenge, String user) throws InternalErrorException, IOException {
 		Random rand = new Random();
 		StringBuffer sb = new StringBuffer();
 		for (int i = 0; i < 8; i++)
@@ -525,7 +525,7 @@ public class RecoverPasswordUserServiceImpl extends
 		challenge.setEmailPin(sb.toString());
 		challenge.setUser(user);
 		
-		RememberPassConfig cfg = getRememberPasswordService().getRememberPassConfiguration();
+		RecoverPassConfig cfg = getRecoverPasswordService().getRecoverPassConfiguration();
 		WebClient request = WebClient.create(translate(cfg.getSmsUrl(), challenge));
 		if (cfg.getSmsHeaders() != null) {
 			for (String line: cfg.getSmsHeaders().split("\n")) {
@@ -559,7 +559,7 @@ public class RecoverPasswordUserServiceImpl extends
 		
 	}
 
-	private String translate(String smsBody, RememberPasswordChallenge challenge) throws UnsupportedEncodingException {
+	private String translate(String smsBody, RecoverPasswordChallenge challenge) throws UnsupportedEncodingException {
 		StringBuffer b = new StringBuffer();
 		int pos = 0;
 		do {
@@ -585,7 +585,7 @@ public class RecoverPasswordUserServiceImpl extends
 	}
 
 
-	private Object eval(String tag, RememberPasswordChallenge challenge) {
+	private Object eval(String tag, RecoverPasswordChallenge challenge) {
 		Object value = null;
 		
 		if (tag.equals("PIN"))
@@ -606,7 +606,7 @@ public class RecoverPasswordUserServiceImpl extends
 		return value;
 	}
 
-	private Collection<UserAnswer> generateOtp(RememberPasswordChallenge challenge, String user) throws InternalErrorException, UnsupportedEncodingException {
+	private Collection<UserAnswer> generateOtp(RecoverPasswordChallenge challenge, String user) throws InternalErrorException, UnsupportedEncodingException {
 		Random rand = new Random();
 		Collection<UserAnswer> requestQuestions = new LinkedList<UserAnswer>();
 

@@ -39,7 +39,7 @@
 			
 			<button id="show_remember_password_questions"
 				label="${c:l('recoverPass.Titol')}" onClick='ref:frame.show_user_questions()'/>
-			<button id="cancel_button" label="${c:l('recoverPass.zul.Cancel')}" onCLick="ref:frame.cancel">
+			<button id="cancel_button" label="${c:l('recoverPass.zul.Cancel')}" onClick="ref:frame.cancel">
 			</button>
 		</div>
 	
