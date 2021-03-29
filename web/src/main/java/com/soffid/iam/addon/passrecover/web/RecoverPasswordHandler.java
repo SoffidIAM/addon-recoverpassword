@@ -112,12 +112,6 @@ public class RecoverPasswordHandler extends Div implements AfterCompose {
 			return;
 		}
 		
-		catch (javax.ejb.EJBException ex)
-		{
-			es.caib.zkib.zkiblaf.Missatgebox.info(org.zkoss.util.resource
-					.Labels.getLabel("recoverPass.zul.ObtainQuestionsError") + ex.getMessage());
-			return;
-		}
 		user_code_req.setVisible(false);
 		user_questions.setVisible(true);
 	}
@@ -189,11 +183,12 @@ public class RecoverPasswordHandler extends Div implements AfterCompose {
 					com.soffid.iam.utils.Security.getCurrentTenantName()+"\\"+txt_user.getValue(), 
 					challenge.getPassword().getPassword()
 				});
-			if (Missatgebox.confirmaOK(org.zkoss.util.resource
-							.Labels.getLabel("changepass.CanviOK"),
-						org.zkoss.util.resource.Labels.getLabel("changepass.CanviPWD")))
+			Missatgebox.confirmaOK(org.zkoss.util.resource.Labels.getLabel("changepass.CanviOK"),
+						org.zkoss.util.resource.Labels.getLabel("changepass.CanviPWD"),
+					(ev) -> {
+						Executions.sendRedirect("/");
+					});
 			{
-				Executions.sendRedirect("/");
 			}
 		}
 		
