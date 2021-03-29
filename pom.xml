@@ -243,7 +243,7 @@
   <properties>
     <!-- Workflow dependencies -->
     <mda.version>67</mda.version>
-    <console.version>3.0.0-SNAPSHOT</console.version>
+    <console.version>3.0.0</console.version>
   </properties>
   <pluginRepositories>
     <pluginRepository>
