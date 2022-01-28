@@ -7,7 +7,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URLEncoder;
 import java.util.Calendar;
 import java.util.Collection;
@@ -18,9 +17,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
-import javax.ws.rs.core.Cookie;
-import javax.ws.rs.core.Form;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.beanutils.PropertyUtils;
@@ -28,7 +24,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.apache.http.HttpStatus;
 
-import com.soffid.iam.ServiceLocator;
 import com.soffid.iam.addons.passrecover.common.MissconfiguredRecoverException;
 import com.soffid.iam.addons.passrecover.common.RecoverMethodEnum;
 import com.soffid.iam.addons.passrecover.common.RecoverPassConfig;
@@ -681,7 +676,7 @@ public class RecoverPasswordUserServiceImpl extends
 			
 			if (challenge.getMethod() == null)
 				throw new MissconfiguredRecoverException(
-						Messages.getString("RememberPasswordUserServiceImpl.UserQuestionsError")); //$NON-NLS-1$
+						Messages.getString("RememberPasswordUserServiceImpl.NoMethodError")); //$NON-NLS-1$
 	
 			int request;
 			int right;
