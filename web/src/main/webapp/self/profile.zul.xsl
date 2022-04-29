@@ -9,7 +9,8 @@
 		<xsl:copy>
 			<xsl:apply-templates select="node()|@*" />
 		</xsl:copy>
-		<button label="${{c:l('recoverPass.Titol')}}" width="300px"
+		<button label="${{c:l('recoverPass.Titol')}}" width="300px" 
+			use="com.soffid.iam.addon.passrecover.web.ConfigureButton"
 			style="margin-left:5px" onClick='es.caib.zkib.zkiblaf.Application.call("addon/passrecover/user_recoverpass.zul?custom=true")'/>
 	</xsl:template>
 
