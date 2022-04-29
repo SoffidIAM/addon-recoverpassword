@@ -33,10 +33,10 @@
 						maxheight="40vh"> 
 			<attribute name="columns"><![CDATA[
 - name: ${c:l('recoverPass.zul.Question2') }
-  template: <input type="text" style="width: 100%; border: none" value="#{question }" onInput="zkDatatable.sendClientAction(this, 'onChangeQuestion', [event.target.value])"/>
+  template: <input type="text" style="width: 100%; border: none" value="#{question }" onInput="var data=this.parentElement.parentElement.data; data.value.question=this.value; data.html=null; zkDatatable.sendClientAction(this, 'onChangeQuestion', [event.target.value])"/>
 - name: ${c:l('recoverPass.zul.Answer') }
   value: answer
-  template: <input type="text" style="width: 100%; border: none" value="#{answer }" onInput="zkDatatable.sendClientAction(this, 'onChangeAnswer', [event.target.value])"/>
+  template: <input type="text" style="width: 100%; border: none" value="#{answer }" onInput="var data=this.parentElement.parentElement.data; data.value.answer=this.value; data.html=null; zkDatatable.sendClientAction(this, 'onChangeAnswer', [event.target.value])"/>
 - name: ""
   sort: false
   className: selector

@@ -51,12 +51,13 @@ public class UserQuestionsHandler extends Window implements AfterCompose {
 	
 	public void changeAnswer(Event event) throws CommitException {
 		String value = ((String[]) event.getData())[0];
-		Component listbox = getFellow("listbox");
+		DataTable listbox = (DataTable) getFellow("listbox");
 		XPathUtils.setValue(listbox, "answer", value);
 		String q = (String) XPathUtils.eval(listbox, "question");
 		if (q != null && value != null && !q.trim().isEmpty() && ! value.trim().isEmpty()) {
 			DataModel model = getModel();
 			model.commit();
+			listbox.updateClientRow(listbox.getSelectedIndex());
 		}
 	}
 
