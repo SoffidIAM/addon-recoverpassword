@@ -116,14 +116,14 @@ public class RecoverPasswordUserServiceImpl extends
 				for (UserAnswer answer : stored.getQuestions()) {
 					for (UserAnswer answer2 : challenge.getQuestions()) {
 						if (answer.getQuestion().replaceAll("\\?",  "").equals(answer2.getQuestion().replaceAll("\\?",  ""))) {
-							answer.setAnswer(answer2.getAnswer());
+							answer2.setQuestion(answer.getQuestion());
 							break;
 						}
 					}
 				}
 				
 				// Verify answers
-				if (verifyAnswers(stored)) {
+				if (verifyAnswers(stored, challenge.getQuestions())) {
 					audit (stored.getUser(), null, "SC_RPANSW", "S", null); //$NON-NLS-1$ //$NON-NLS-2$
 					stored.setAnswered(true);
 					return true;
@@ -138,59 +138,64 @@ public class RecoverPasswordUserServiceImpl extends
 
 	/**
 	 * @param stored
+	 * @param collection 
 	 * @return
 	 * @throws InternalErrorException
 	 */
-	private boolean verifyAnswers(RecoverPasswordChallenge stored)
+	private boolean verifyAnswers(RecoverPasswordChallenge stored, Collection<UserAnswer> answers)
 			throws InternalErrorException {
 		int answeredOK = 0; // Question answered correctly
 		int toAnswer; // Quenstions to answser
 		boolean verified = true; // Answers verified
 
 
-		Collection<UserAnswer> userAnswers ;
+		Collection<UserAnswer> expectedAnswers ;
 		if (stored.getMethod().equals (RecoverMethodEnum.RECOVER_BY_MAIL) ||
 				stored.getMethod().equals (RecoverMethodEnum.RECOVER_BY_SMS))
 		{
 			toAnswer = 1;
-			userAnswers = new LinkedList<UserAnswer>();
-			for (UserAnswer answer: stored.getQuestions())
+			expectedAnswers = new LinkedList<UserAnswer>();
+			for (UserAnswer answer: answers)
 			{
 				UserAnswer answer2 = new UserAnswer(answer);
 				answer2.setAnswer(stored.getEmailPin());
-				userAnswers.add(answer2);
+				expectedAnswers.add(answer2);
+				for (UserAnswer answer3: answers)
+				{
+					answer3.setQuestion(answer2.getQuestion());
+				}
 			}
 		}
 		else
 		{
 			toAnswer = getRecoverPasswordService().getRecoverPassConfiguration().getRight();
-			userAnswers = getRecoverPasswordService()
+			expectedAnswers = getRecoverPasswordService()
 				.findUserAnswersByUserName(stored.getUser());
 		}
 		
 		log.info("Testing answers ");
 
-		for (UserAnswer userAnswer : userAnswers) {
-			log.info("Testing answer "+userAnswer.getQuestion());
-			if (userAnswer.getAnswer() != null)
+		for (UserAnswer expectedAnswer : expectedAnswers) {
+			log.info("Testing answer "+expectedAnswer.getQuestion());
+			if (expectedAnswer.getAnswer() != null)
 			{
-				for (UserAnswer storedAnswer : stored.getQuestions()) {
+				for (UserAnswer userAnswer : answers) {
 //					log.info("Stored "+storedAnswer.getQuestion()+"=>"+storedAnswer.getAnswer());
-					if (storedAnswer.getQuestion() != null &&
-							storedAnswer.getAnswer() != null &&
-							storedAnswer.getQuestion().replaceAll("\\?",  "").
-								equalsIgnoreCase(userAnswer.getQuestion().replaceAll("\\?",  "")))
+					if (userAnswer.getQuestion() != null &&
+							userAnswer.getAnswer() != null &&
+							userAnswer.getQuestion().replaceAll("\\?",  "").
+								equalsIgnoreCase(expectedAnswer.getQuestion().replaceAll("\\?",  "")))
 					{
-						String q1 = userAnswer.getAnswer().replaceAll(" *", "").toLowerCase(); //$NON-NLS-1$ //$NON-NLS-2$
-						String q2 = storedAnswer.getAnswer().replaceAll(" *", "").toLowerCase(); //$NON-NLS-1$ //$NON-NLS-2$
+						String q1 = expectedAnswer.getAnswer().replaceAll(" *", "").toLowerCase(); //$NON-NLS-1$ //$NON-NLS-2$
+						String q2 = userAnswer.getAnswer().replaceAll(" *", "").toLowerCase(); //$NON-NLS-1$ //$NON-NLS-2$
 						if (q1.equals(q2)) {
 							answeredOK++;
-							log.info("Answered correctly "+storedAnswer.getQuestion()+" ("+answeredOK+")");
+							log.info("Answered correctly "+userAnswer.getQuestion()+" ("+answeredOK+")");
 						} else {
-							audit (stored.getUser(), storedAnswer.getQuestion(), "SC_RPANSW", "F", null); //$NON-NLS-1$ //$NON-NLS-2$
+							audit (stored.getUser(), userAnswer.getQuestion(), "SC_RPANSW", "F", null); //$NON-NLS-1$ //$NON-NLS-2$
 						}
 					} else {
-						log.info("Skip answer "+storedAnswer.getQuestion());
+						log.info("Skip answer "+userAnswer.getQuestion());
 					}
 				}
 			}
