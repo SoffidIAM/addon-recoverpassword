@@ -43,6 +43,9 @@
 					<customfield3 label="${c:l('recoverPass.zul.RequireQuestions')}" dataType="STRING" enumeration="com.soffid.iam.addons.passrecover.common.RequireQuestion"
 						bind="@required" required="true"/>
 
+					<customfield3 label="${c:l('recoverPass.zul.emailSubject')}" bind="@emailSubject"  maxlength="250"/>
+					<customfield3 label="${c:l('recoverPass.zul.emailBody')}" dataType="HTML" bind="@emailBody"/>
+
 					<customfield3 label="${c:l('recoverPass.zul.smsUrl')}" bind="@smsUrl" maxlength="250"/>
 					<customfield3 label="${c:l('recoverPass.zul.smsMethod')}"  bind="@smsMethod"  maxlength="250"/>
 					<customfield3 label="${c:l('recoverPass.zul.smsBody')}"  bind="@smsBody" maxlength="250" />
@@ -50,6 +53,10 @@
 					<customfield3 label="${c:l('recoverPass.zul.smsCheck')}" bind="@smsResponseToCheck"  maxlength="250"/>
 					<customfield3 label="${c:l('recoverPass.zul.smsAttribute')}" bind="@smsAttribute"  maxlength="250"/>
 
+					<div style="margin-left: 400px">
+						<label style="font-weight: bold" value="Tip: " />
+						Use the ${"$"}{variable} syntax to customize SMS and e-mails. Use ${"$"}{PIN} for the secret pin, or ${"$"}{attributeName} for any user attribute like ${"$"}{fullName}
+					</div>
 					<div style="margin-top: 2em">
 						<button image="/img/save-r.svg" label="${c:l('task.filter.lblConfirmaCambios') }" onClick="ref:frame.commit"
 							style="text-align:right"/>

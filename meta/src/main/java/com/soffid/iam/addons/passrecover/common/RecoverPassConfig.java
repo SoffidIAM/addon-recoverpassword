@@ -50,4 +50,11 @@ public class RecoverPassConfig {
 
 	@Nullable
 	public String smsResponseToCheck;
+	
+	@Nullable
+	public String emailSubject;
+
+	@Nullable
+	public String emailBody;
+
 }

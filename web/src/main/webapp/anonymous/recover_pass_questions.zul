@@ -8,14 +8,35 @@
 		div.login {
 			width: 550px;
 		}
+		
+		div.qa {
+			margin-bottom: 24px;
+		}
 		.qa table input {
 			margin: 0;
 		}
 		.qa table span {
 		    margin-top: 5px;
 		    display: inline-block;
-		    color: black;
+		    color: white;
 		}
+		div.grid-head tr, div.grid-head th, table.grid th, div.grid-head tr div {
+			background: inherit;
+			border: none  !important;
+			border-left: none;
+			border-right: none;
+			border-right-color: transparent !important;
+			border-left-color: transparent !important;
+		}
+		div.head-cell-inner {
+			color: white;
+		}
+		
+		div.login td.gc, tr.odd, tr.odd td.gc, div.grid-body {
+			background-color: transparent;
+			color: white;
+		}
+			
 	</style>
 	<div xmlns:h="http://www.w3.org/1999/xhtml" sclass="login" use="com.soffid.iam.addon.passrecover.web.RecoverPasswordHandler" id="frame">
 		<datamodel id="model" rootNode="challenge"
