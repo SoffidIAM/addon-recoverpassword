@@ -478,8 +478,9 @@ public class RecoverPasswordUserServiceImpl extends
 	 * @param user
 	 * @return
 	 * @throws InternalErrorException 
+	 * @throws UnsupportedEncodingException 
 	 */
-	private Collection<UserAnswer> generateEmail(RecoverPasswordChallenge challenge, String user) throws InternalErrorException {
+	private Collection<UserAnswer> generateEmail(RecoverPasswordChallenge challenge, String user) throws InternalErrorException, UnsupportedEncodingException {
 		Random rand = new Random();
 		StringBuffer sb = new StringBuffer();
 		for (int i = 0; i < 4; i++)
@@ -500,9 +501,19 @@ public class RecoverPasswordUserServiceImpl extends
 		
 		challenge.setEmailPin(sb.toString());
 
-		String msg = String.format ( Messages.getString("RememberPasswordUserServiceImpl.Email.message"), //$NON-NLS-1$
+		RecoverPassConfig config = getRecoverPasswordService().getRecoverPassConfiguration();
+		String msg;
+		if (config.getEmailBody() != null && ! config.getEmailBody().trim().isEmpty())
+			msg = translate(config.getEmailBody(), challenge);
+		else
+			msg = String.format ( Messages.getString("RememberPasswordUserServiceImpl.Email.message"), //$NON-NLS-1$
 				user, sb.toString());
-		getMailService().sendHtmlMail(getRecoveryEmail(user), Messages.getString("RememberPasswordUserServiceImpl.5"), msg); //$NON-NLS-1$
+		final String subject;
+		if (config.getEmailSubject() != null && !config.getEmailSubject().trim().isEmpty())
+			subject = translate(config.getEmailSubject(), challenge);
+		else
+			subject = Messages.getString("RememberPasswordUserServiceImpl.5");
+		getMailService().sendHtmlMail(getRecoveryEmail(user), subject, msg); //$NON-NLS-1$
 		return requestQuestions;
 	}
 

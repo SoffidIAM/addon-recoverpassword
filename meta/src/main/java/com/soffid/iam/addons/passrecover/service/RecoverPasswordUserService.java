@@ -15,6 +15,7 @@ import es.caib.seycon.ng.exception.UnknownUserException;
 import es.caib.seycon.ng.model.DadaUsuariEntity;
 import es.caib.seycon.ng.model.ServerEntity;
 import es.caib.seycon.ng.servei.AccountService;
+import es.caib.seycon.ng.servei.ConfiguracioService;
 import es.caib.seycon.ng.servei.DadesAddicionalsService;
 import es.caib.seycon.ng.servei.UsuariService;
 
@@ -36,7 +37,8 @@ import org.springframework.transaction.annotation.Transactional;
 	DadaUsuariEntity.class,
 	OTPValidationService.class,
 	ServerEntity.class,
-	MailService.class})
+	MailService.class, 
+	ConfiguracioService.class})
 public abstract class RecoverPasswordUserService {
 
 	/**

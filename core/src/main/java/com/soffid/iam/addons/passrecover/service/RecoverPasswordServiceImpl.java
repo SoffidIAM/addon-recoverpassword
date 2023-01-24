@@ -3,6 +3,7 @@
  */
 package com.soffid.iam.addons.passrecover.service;
 
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collection;
@@ -38,6 +39,8 @@ public class RecoverPasswordServiceImpl extends RecoverPasswordServiceBase {
 	private static final String PREFERRED_METHOD_PROPERTY = "addon.retrieve.password.preferred-method";
 	private static final String ALLOW_SMS_PROPERTY = "addon.retrieve.password.allow-sms";
 	private static final String ALLOW_OTP_PROPERTY = "addon.retrieve.password.allow-otp";
+	private static final String EMAIL_SUBJECT_PROPERTY = "addon.retrieve.password.email-subject";
+	private static final String EMAIL_BODY_PROPERTY = "addon.retrieve.password.email-body";
 	private static final String SMS_ATTRIBUTE = "addon.retrieve.password.sms-attribute";
 	private static final String SMS_URL = "addon.retrieve.password.sms-url";
 	private static final String SMS_METHOD = "addon.retrieve.password.sms-methdo";
@@ -289,6 +292,28 @@ public class RecoverPasswordServiceImpl extends RecoverPasswordServiceBase {
 			getConfigurationService().update(toUpdate);
 		}
 
+		toUpdate = getConfigurationService().findParameterByNameAndNetworkName(
+				EMAIL_SUBJECT_PROPERTY, null);
+		if (toUpdate == null) {
+			getConfigurationService()
+					.create(new Configuration(
+							EMAIL_SUBJECT_PROPERTY,
+							config.getEmailSubject(),
+							null,
+							"Email recovery subject",
+							null));
+		}
+		else 
+		{
+			toUpdate.setValue(config.getEmailSubject());
+			getConfigurationService().update(toUpdate);
+		}
+		
+		if (config.getEmailBody() == null)
+			getConfigurationService().deleteBlob(EMAIL_BODY_PROPERTY);
+		else
+			getConfigurationService().updateBlob(EMAIL_BODY_PROPERTY, config.getEmailBody().getBytes(StandardCharsets.UTF_8));
+
 		updateConfig ( ALLOW_OTP_PROPERTY, config.isAllowOtpRecovery(), "Allow OTP Recovery");
 		updateConfig ( ALLOW_SMS_PROPERTY, config.isAllowSmsRecovery(), "Allow SMS Recovery");
 		updateConfig ( SMS_BODY, config.getSmsBody(), "SMS Service body");
@@ -427,6 +452,12 @@ public class RecoverPasswordServiceImpl extends RecoverPasswordServiceBase {
 				configuration.setPreferredMethod(RecoverMethodEnum.RECOVER_BY_QUESTIONS);
 			}
 		}
+		
+		systemConfig = ConfigurationCache.getProperty(EMAIL_SUBJECT_PROPERTY);
+		configuration.setEmailSubject(systemConfig);
+		
+		byte[] data = getConfigurationService().getBlob(EMAIL_BODY_PROPERTY);
+		configuration.setEmailBody(data == null ? null: new String(data, StandardCharsets.UTF_8));
 		
 		return configuration;
 	}
