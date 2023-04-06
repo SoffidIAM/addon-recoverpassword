@@ -6,6 +6,7 @@
 
 package com.soffid.iam.addons.passrecover.service;
 import com.soffid.iam.addons.passrecover.common.MissconfiguredRecoverException;
+import com.soffid.iam.addons.passrecover.model.OngoingChallengeEntity;
 import com.soffid.iam.service.MailService;
 import com.soffid.iam.service.OTPValidationService;
 import com.soffid.mda.annotation.*;
@@ -38,7 +39,8 @@ import org.springframework.transaction.annotation.Transactional;
 	OTPValidationService.class,
 	ServerEntity.class,
 	MailService.class, 
-	ConfiguracioService.class})
+	ConfiguracioService.class,
+	OngoingChallengeEntity.class})
 public abstract class RecoverPasswordUserService {
 
 	/**

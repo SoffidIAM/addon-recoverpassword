@@ -23,12 +23,16 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.apache.http.HttpStatus;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import com.soffid.iam.addons.passrecover.common.MissconfiguredRecoverException;
 import com.soffid.iam.addons.passrecover.common.RecoverMethodEnum;
 import com.soffid.iam.addons.passrecover.common.RecoverPassConfig;
 import com.soffid.iam.addons.passrecover.common.RecoverPasswordChallenge;
 import com.soffid.iam.addons.passrecover.common.UserAnswer;
+import com.soffid.iam.addons.passrecover.model.OngoingChallengeEntity;
+import com.soffid.iam.addons.passrecover.model.OngoingChallengeEntityDao;
 import com.soffid.iam.api.Account;
 import com.soffid.iam.api.Audit;
 import com.soffid.iam.api.Challenge;
@@ -47,6 +51,7 @@ import com.soffid.iam.model.UserEntity;
 import com.soffid.iam.remote.RemoteServiceLocator;
 import com.soffid.iam.sync.engine.intf.DebugTaskResults;
 import com.soffid.iam.sync.service.SyncStatusService;
+import com.soffid.iam.utils.Password;
 import com.soffid.iam.utils.Security;
 
 import es.caib.seycon.ng.comu.ServerType;
@@ -61,30 +66,93 @@ import es.caib.seycon.ng.exception.UnknownUserException;
 public class RecoverPasswordUserServiceImpl extends
 		RecoverPasswordUserServiceBase {
 
-	HashMap<Long, RecoverPasswordChallenge> challenges = new HashMap<Long, RecoverPasswordChallenge>();
 	long nextPurge = 0;
 	org.apache.commons.logging.Log log = LogFactory.getLog(getClass());
 
-	private void purge() {
-		synchronized (challenges) {
-			Date now = new Date();
-			for (Iterator<Long> it = challenges.keySet().iterator(); it
-					.hasNext();) {
-				Long id = it.next();
-				RecoverPasswordChallenge ch = challenges.get(id);
-				if (ch.getExpirationDate().getTime().before(now)) {
-					it.remove();
-				}
-			}
-		}
+	private void purge() throws InternalErrorException {
+		getOngoingChallengeEntityDao().deleteExpired();
 		nextPurge = System.currentTimeMillis() + 120000; // every 2 minutes
 	}
 
 	private RecoverPasswordChallenge getStoredChallenge(
-			RecoverPasswordChallenge vo) {
+			RecoverPasswordChallenge vo) throws InternalErrorException {
 		if (System.currentTimeMillis() > nextPurge)
 			purge();
-		return challenges.get(vo.getChallengId());
+
+		OngoingChallengeEntity entity = getOngoingChallengeEntityDao().load(vo.getChallengId());
+		if (entity == null)
+			return null;
+		RecoverPasswordChallenge ch = new RecoverPasswordChallenge();
+		ch.setChallengId(entity.getId());
+		Calendar c = Calendar.getInstance();
+		c.setTime(entity.getDate());
+		ch.setChallengeDate(c);
+		c = Calendar.getInstance();
+		c.setTime(entity.getExpirationDate());
+		ch.setExpirationDate(c);
+		ch.setDispatcher(entity.getSystem());
+		ch.setAnswered(entity.isAnswered());
+		ch.setMethod(entity.getType());
+		if (entity.getType() == RecoverMethodEnum.RECOVER_BY_MAIL || 
+				entity.getType() == RecoverMethodEnum.RECOVER_BY_SMS)
+			ch.setEmailPin( Password.decode(entity.getValue()).getPassword());
+		else if (entity.getType() == RecoverMethodEnum.RECOVER_BY_OTP) {
+			Challenge otp = new Challenge();
+			otp.setChallengeId(entity.getOtpChallengeId());
+			otp.setCardNumber(entity.getOtpCard());
+			otp.setCell(entity.getOtpCell());
+			otp.setOtpHandler(entity.getOtpHandler());
+			ch.setOtpChallenge(otp);
+		}
+
+		String p = Password.decode(entity.getQuestions()).getPassword();
+		JSONArray a = new JSONArray(p);
+		ch.setQuestions(new LinkedList<UserAnswer>());
+		for (int i = 0; i < a.length(); i++) {
+			UserAnswer ua = new UserAnswer();
+			final JSONObject jsonObject = a.getJSONObject(i);
+			ua.setAnswer(jsonObject.getString("answer"));
+			ua.setQuestion(jsonObject.getString("question"));
+			ch.getQuestions().add(ua);
+		}
+
+		ch.setUser(getUserEntityDao().load(entity.getUserId()).getUserName());
+		return ch;
+	}
+
+	private void saveChallenge(RecoverPasswordChallenge challenge) {
+		OngoingChallengeEntity entity = challenge.getChallengId() == null ? 
+				getOngoingChallengeEntityDao().newOngoingChallengeEntity() :
+				getOngoingChallengeEntityDao().load(challenge.getChallengId());
+		entity.setAnswered(challenge.isAnswered());
+		entity.setDate(challenge.getChallengeDate().getTime());
+		entity.setExpirationDate(challenge.getExpirationDate().getTime());
+		entity.setSystem(challenge.getDispatcher());
+		entity.setType(challenge.getMethod());
+		entity.setUserId(getUserEntityDao().findByUserName(challenge.getUser()).getId());
+		if (challenge.getMethod() == RecoverMethodEnum.RECOVER_BY_MAIL ||
+				challenge.getMethod() == RecoverMethodEnum.RECOVER_BY_SMS) {
+			entity.setValue(new Password(challenge.getEmailPin()).toString());
+		}
+		else if (challenge.getMethod() == RecoverMethodEnum.RECOVER_BY_OTP) {
+			entity.setOtpCard(challenge.getOtpChallenge().getCardNumber());
+			entity.setOtpCell(challenge.getOtpChallenge().getCell());
+			entity.setOtpChallengeId(challenge.getOtpChallenge().getChallengeId());
+			entity.setOtpHandler(challenge.getOtpChallenge().getOtpHandler());
+		}
+		JSONArray a = new JSONArray();
+		for (UserAnswer ua: challenge.getQuestions()) {
+			JSONObject o = new JSONObject();
+			o.put("answer", ua.getAnswer());
+			o.put("question", ua.getQuestion());
+			a.put(o);
+		}
+		entity.setQuestions(new Password(a.toString()).toString());
+		if (entity.getId() == null)
+			getOngoingChallengeEntityDao().create(entity);
+		else
+			getOngoingChallengeEntityDao().update(entity);
+		challenge.setChallengId(entity.getId());
 	}
 
 	/*
@@ -108,6 +176,7 @@ public class RecoverPasswordUserServiceImpl extends
 				UserAnswer answer = challenge.getQuestions().iterator().next();
 				if (getOTPValidationService().validatePin(stored.getOtpChallenge(), answer.getAnswer())) {
 					stored.setAnswered(true);
+					saveChallenge(stored);
 					return true;
 				}
 				else
@@ -126,6 +195,7 @@ public class RecoverPasswordUserServiceImpl extends
 				if (verifyAnswers(stored, challenge.getQuestions())) {
 					audit (stored.getUser(), null, "SC_RPANSW", "S", null); //$NON-NLS-1$ //$NON-NLS-2$
 					stored.setAnswered(true);
+					saveChallenge(stored);
 					return true;
 				} else
 					return false;
@@ -251,9 +321,7 @@ public class RecoverPasswordUserServiceImpl extends
 				getInternalPasswordService().storeAndSynchronizePassword(user,
 						passwordDomain, challenge.getPassword(), false);
 			}
-			synchronized (challenges) {
-				challenges.remove(challenge.getChallengId());
-			}
+			getOngoingChallengeEntityDao().remove(challenge.getChallengId());
 		} finally {
 			Security.nestedLogoff();
 		}
@@ -727,10 +795,7 @@ public class RecoverPasswordUserServiceImpl extends
 				else if (challenge.getMethod().equals(RecoverMethodEnum.RECOVER_BY_OTP))
 					challenge.setQuestions(generateOtp(challenge, user));
 				challenge.setUser(user);
-				challenge.setChallengId(new Long(challenge.hashCode()));
-				synchronized (challenges) {
-					challenges.put(challenge.getChallengId(), challenge);
-				}
+				saveChallenge(challenge);
 			} else {
 				throw new UnknownUserException(Messages.getString("RememberPasswordUserServiceImpl.UserNotFoundError")); //$NON-NLS-1$
 			}

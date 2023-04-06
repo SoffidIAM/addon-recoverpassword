@@ -43,8 +43,6 @@
 			src="addon/passrecover/descResetPassword.xml" />
 	
 		<image src="/anonymous/logo.png" style="max-width: 250px; max-height: 125px;"/>
-        <image src="/anonymous/logo - iam-orig.svg" style="width: 250px; height: 125px;"/> 
-	
 		
 		<div id="user_code_req" visible="true" class="loginbox">
 			<label value="${c:l('recoverPass.zul.IdentifyMessage')}"/>
