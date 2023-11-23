@@ -109,6 +109,8 @@ public class RecoverPasswordServiceImpl extends RecoverPasswordServiceBase {
 		getDefaultQuestionEntityDao()
 				.remove(getDefaultQuestionEntityDao().defaultQuestionToEntity(
 						question));
+
+		new SignalGenerator().generateRecoveryChangeEvent(entity.getUser().getUserName());
 	}
 
 	/*
@@ -519,6 +521,9 @@ public class RecoverPasswordServiceImpl extends RecoverPasswordServiceBase {
 		getUserAnswerEntityDao().update(entity);
 
 		audit (Security.getCurrentUser(), answer.getQuestion(), "SC_RPANSW", "U"); //$NON-NLS-1$ //$NON-NLS-2$
+
+		new SignalGenerator().generateRecoveryChangeEvent(entity.getUser().getUserName());
+
 		return getUserAnswerEntityDao().toUserAnswer(entity);
 	}
 
@@ -537,6 +542,9 @@ public class RecoverPasswordServiceImpl extends RecoverPasswordServiceBase {
 		answer.setId(entity.getId());
 
 		audit (Security.getCurrentUser(), answer.getQuestion(), "SC_RPANSW", "C"); //$NON-NLS-1$ //$NON-NLS-2$
+
+		new SignalGenerator().generateRecoveryChangeEvent(entity.getUser().getUserName());
+		
 		return getUserAnswerEntityDao().toUserAnswer(entity);
 	}
 
