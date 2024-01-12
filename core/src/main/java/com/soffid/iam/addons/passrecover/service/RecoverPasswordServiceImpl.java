@@ -110,7 +110,6 @@ public class RecoverPasswordServiceImpl extends RecoverPasswordServiceBase {
 				.remove(getDefaultQuestionEntityDao().defaultQuestionToEntity(
 						question));
 
-		new SignalGenerator().generateRecoveryChangeEvent(entity.getUser().getUserName());
 }
 
 	/*
