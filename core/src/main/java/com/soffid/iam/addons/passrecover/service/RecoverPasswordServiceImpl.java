@@ -111,7 +111,7 @@ public class RecoverPasswordServiceImpl extends RecoverPasswordServiceBase {
 						question));
 
 		new SignalGenerator().generateRecoveryChangeEvent(entity.getUser().getUserName());
-	}
+}
 
 	/*
 	 * (non-Javadoc)

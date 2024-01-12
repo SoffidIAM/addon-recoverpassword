@@ -379,6 +379,8 @@ public class RecoverPasswordUserServiceImpl extends
 			}
 			String user = ( (UserAccount) acc ).getUser();
 			
+			new SignalGenerator().generateRecoveryActivationEvent(acc.getName(), acc.getSystem());
+			
 			return handleRequestChallenge (user);
 		} finally {
 			Security.nestedLogoff();
