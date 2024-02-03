@@ -102,6 +102,8 @@ public class RecoverPasswordUserServiceImpl extends
 			otp.setCardNumber(entity.getOtpCard());
 			otp.setCell(entity.getOtpCell());
 			otp.setOtpHandler(entity.getOtpHandler());
+			otp.setUser( getUserEntityDao().toUser(
+					getUserEntityDao().load(entity.getUserId())) );
 			ch.setOtpChallenge(otp);
 		}
 
