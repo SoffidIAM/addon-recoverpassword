@@ -576,13 +576,13 @@ public class RecoverPasswordUserServiceImpl extends
 		RecoverPassConfig config = getRecoverPasswordService().getRecoverPassConfiguration();
 		String msg;
 		if (config.getEmailBody() != null && ! config.getEmailBody().trim().isEmpty())
-			msg = translate(config.getEmailBody(), challenge);
+			msg = translate(config.getEmailBody(), challenge, true);
 		else
 			msg = String.format ( Messages.getString("RememberPasswordUserServiceImpl.Email.message"), //$NON-NLS-1$
 				user, sb.toString());
 		final String subject;
 		if (config.getEmailSubject() != null && !config.getEmailSubject().trim().isEmpty())
-			subject = translate(config.getEmailSubject(), challenge);
+			subject = translate(config.getEmailSubject(), challenge, true);
 		else
 			subject = Messages.getString("RememberPasswordUserServiceImpl.5");
 		getMailService().sendHtmlMail(getRecoveryEmail(user), subject, msg); //$NON-NLS-1$
@@ -609,7 +609,7 @@ public class RecoverPasswordUserServiceImpl extends
 		challenge.setUser(user);
 		
 		RecoverPassConfig cfg = getRecoverPasswordService().getRecoverPassConfiguration();
-		WebClient request = WebClient.create(translate(cfg.getSmsUrl(), challenge));
+		WebClient request = WebClient.create(translate(cfg.getSmsUrl(), challenge, false));
 		if (cfg.getSmsHeaders() != null) {
 			for (String line: cfg.getSmsHeaders().split("\n")) {
 				line = line.trim();
@@ -624,7 +624,7 @@ public class RecoverPasswordUserServiceImpl extends
 			}
 		}
 		log.info("Sending message to "+challenge.getUser());
-		Response response = request.invoke(cfg.getSmsMethod(), translate(cfg.getSmsBody(), challenge));
+		Response response = request.invoke(cfg.getSmsMethod(), translate(cfg.getSmsBody(), challenge, false));
 
 		if ( response.getStatus() != HttpStatus.SC_OK)
 			throw new InternalError ("Error sending SMS message: HTTP/"+response.getStatus());
@@ -642,7 +642,7 @@ public class RecoverPasswordUserServiceImpl extends
 		
 	}
 
-	private String translate(String smsBody, RecoverPasswordChallenge challenge) throws UnsupportedEncodingException {
+	private String translate(String smsBody, RecoverPasswordChallenge challenge, boolean isHTML) throws UnsupportedEncodingException {
 		StringBuffer b = new StringBuffer();
 		int pos = 0;
 		do {
@@ -659,8 +659,17 @@ public class RecoverPasswordUserServiceImpl extends
 				String tag = smsBody.substring(next+2, last);
 				Object value = eval (tag, challenge);
 				b.append(smsBody.substring(pos, next));
-				if (value != null) 
-					b.append( URLEncoder.encode(value.toString(), "UTF-8"));
+				if (value != null) {
+					if (isHTML) {
+						String s = value.toString();
+						s = s.replaceAll("&", "&amp;");
+						s = s.replaceAll("<", "&lt;");
+						s = s.replaceAll(">", "&gt;");
+						b.append(s);
+					} else {
+						b.append(URLEncoder.encode(value.toString(), "UTF-8"));
+					}
+				}
 				pos = last + 1;
 			}
 		} while (true);
