@@ -171,9 +171,10 @@ public class RecoverPasswordUserServiceImpl extends
 		Security.nestedLogin(Security.ALL_PERMISSIONS);
 		try {
 			RecoverPasswordChallenge stored = getStoredChallenge(challenge);
-      if (stored==null)
-			  return false;
-      
+			if (stored==null) {
+				log.info("Challenge "+challenge.getChallengId()+" not found");
+				return false;    
+			}
 			if (stored.getMethod() == RecoverMethodEnum.RECOVER_BY_OTP) {
 				UserAnswer answer = challenge.getQuestions().iterator().next();
 				if (getOTPValidationService().validatePin(stored.getOtpChallenge(), answer.getAnswer())) {
@@ -245,14 +246,10 @@ public class RecoverPasswordUserServiceImpl extends
 				.findUserAnswersByUserName(stored.getUser());
 		}
 		
-		log.info("Testing answers ");
-
 		for (UserAnswer expectedAnswer : expectedAnswers) {
-			log.info("Testing answer "+expectedAnswer.getQuestion());
 			if (expectedAnswer.getAnswer() != null)
 			{
 				for (UserAnswer userAnswer : answers) {
-//					log.info("Stored "+storedAnswer.getQuestion()+"=>"+storedAnswer.getAnswer());
 					if (userAnswer.getQuestion() != null &&
 							userAnswer.getAnswer() != null &&
 							userAnswer.getQuestion().replaceAll("\\?",  "").
@@ -262,12 +259,10 @@ public class RecoverPasswordUserServiceImpl extends
 						String q2 = userAnswer.getAnswer().replaceAll(" *", "").toLowerCase(); //$NON-NLS-1$ //$NON-NLS-2$
 						if (q1.equals(q2)) {
 							answeredOK++;
-							log.info("Answered correctly "+userAnswer.getQuestion()+" ("+answeredOK+")");
 						} else {
 							audit (stored.getUser(), userAnswer.getQuestion(), "SC_RPANSW", "F", null); //$NON-NLS-1$ //$NON-NLS-2$
 						}
 					} else {
-						log.info("Skip answer "+userAnswer.getQuestion());
 					}
 				}
 			}
@@ -395,7 +390,6 @@ public class RecoverPasswordUserServiceImpl extends
 		
 		if (config.getPreferredMethod().equals (RecoverMethodEnum.RECOVER_BY_MAIL))
 		{
-//			log.info("Preferred email");
 			if (hasRecoveryEmail (user) && config.isAllowMailRecovery())
 				return RecoverMethodEnum.RECOVER_BY_MAIL;
 			else if (hasQuestions (user) && config.isAllowQuestionRecovery())
@@ -409,7 +403,6 @@ public class RecoverPasswordUserServiceImpl extends
 		}
 		else if (config.getPreferredMethod().equals (RecoverMethodEnum.RECOVER_BY_QUESTIONS))
 		{
-//			log.info("Preferred questions");
 			if (hasQuestions (user) && config.isAllowQuestionRecovery())
 				return RecoverMethodEnum.RECOVER_BY_QUESTIONS;
 			else if (hasRecoveryEmail (user) && config.isAllowMailRecovery())
@@ -423,7 +416,6 @@ public class RecoverPasswordUserServiceImpl extends
 		}
 		else if (config.getPreferredMethod().equals (RecoverMethodEnum.RECOVER_BY_SMS))
 		{
-//			log.info("Preferred sms");
 			if (config.isAllowSmsRecovery() && hasSms(user, config))
 				return RecoverMethodEnum.RECOVER_BY_SMS;
 			else if (hasQuestions (user) && config.isAllowQuestionRecovery())
@@ -437,7 +429,6 @@ public class RecoverPasswordUserServiceImpl extends
 		}
 		else
 		{
-//			log.info("Preferred otp");
 			if (config.isAllowOtpRecovery() && hasToken(user, challenge))
 				return RecoverMethodEnum.RECOVER_BY_OTP;
 			else if (hasQuestions (user) && config.isAllowQuestionRecovery())

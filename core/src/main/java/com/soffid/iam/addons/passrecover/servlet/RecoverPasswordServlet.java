@@ -87,6 +87,9 @@ public class RecoverPasswordServlet extends HttpServlet {
 	
 	private String doResponseChallengeAction(HttpServletRequest req,
 			HttpServletResponse resp) throws InternalErrorException, UnsupportedEncodingException {
+		
+		log.info("Received response challenge from "+req.getParameter("user"));
+
 		RecoverPasswordUserService svc = PassrecoverServiceLocator.instance().getRecoverPasswordUserService();
 		
 		
@@ -106,10 +109,13 @@ public class RecoverPasswordServlet extends HttpServlet {
 		
 		for (String param: (Set<String>) req.getParameterMap().keySet())
 		{
-			UserAnswer a = new UserAnswer();
-			a.setQuestion(param);
-			a.setAnswer(req.getParameter(param));
-			q.add(a);
+			if (!"user".equals(param) && !"domain".equals(param) &&
+					!"id".equals(param) && !"action".equals(param)) {
+				UserAnswer a = new UserAnswer();
+				a.setQuestion(param);
+				a.setAnswer(req.getParameter(param));
+				q.add(a);
+			}
 		}
 
 		request.setQuestions(q);
