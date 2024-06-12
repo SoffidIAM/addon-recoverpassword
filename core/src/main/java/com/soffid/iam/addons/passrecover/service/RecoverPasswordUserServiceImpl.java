@@ -10,9 +10,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -32,7 +29,6 @@ import com.soffid.iam.addons.passrecover.common.RecoverPassConfig;
 import com.soffid.iam.addons.passrecover.common.RecoverPasswordChallenge;
 import com.soffid.iam.addons.passrecover.common.UserAnswer;
 import com.soffid.iam.addons.passrecover.model.OngoingChallengeEntity;
-import com.soffid.iam.addons.passrecover.model.OngoingChallengeEntityDao;
 import com.soffid.iam.api.Account;
 import com.soffid.iam.api.Audit;
 import com.soffid.iam.api.Challenge;
@@ -182,8 +178,9 @@ public class RecoverPasswordUserServiceImpl extends
 					saveChallenge(stored);
 					return true;
 				}
-				else
+				else {
 					return false;
+				}
 			} else {
 				for (UserAnswer answer : stored.getQuestions()) {
 					for (UserAnswer answer2 : challenge.getQuestions()) {

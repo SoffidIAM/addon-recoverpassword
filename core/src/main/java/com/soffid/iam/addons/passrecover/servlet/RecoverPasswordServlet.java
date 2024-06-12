@@ -109,7 +109,7 @@ public class RecoverPasswordServlet extends HttpServlet {
 		
 		for (String param: (Set<String>) req.getParameterMap().keySet())
 		{
-			if (!"user".equals(param) && !"domain".equals(param) &&
+			if (!"user".equals(param) && !param.startsWith("domain") &&
 					!"id".equals(param) && !"action".equals(param)) {
 				UserAnswer a = new UserAnswer();
 				a.setQuestion(param);
