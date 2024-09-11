@@ -787,6 +787,7 @@ public class RecoverPasswordUserServiceImpl extends
 	
 				date.add(Calendar.MINUTE, 30);
 				challenge.setExpirationDate(date);
+				challenge.setUser(user);
 				if (challenge.getMethod().equals(RecoverMethodEnum.RECOVER_BY_QUESTIONS))
 					challenge.setQuestions(generateQuestions(user));
 				else if (challenge.getMethod().equals(RecoverMethodEnum.RECOVER_BY_MAIL))
@@ -795,7 +796,6 @@ public class RecoverPasswordUserServiceImpl extends
 					challenge.setQuestions(generateSms(challenge, user));
 				else if (challenge.getMethod().equals(RecoverMethodEnum.RECOVER_BY_OTP))
 					challenge.setQuestions(generateOtp(challenge, user));
-				challenge.setUser(user);
 				saveChallenge(challenge);
 			} else {
 				throw new UnknownUserException(Messages.getString("RememberPasswordUserServiceImpl.UserNotFoundError")); //$NON-NLS-1$
