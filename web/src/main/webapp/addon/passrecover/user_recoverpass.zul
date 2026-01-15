@@ -8,7 +8,7 @@
 
 	<window id="window" mode="highlighted" title="${c:l('recoverPass.Titol') }" 
 		position="center, top" use="com.soffid.iam.addon.passrecover.web.UserQuestionsHandler"
-		style="max-width: 600px; width: 80%">
+		style="min-width: 600px; width: 80%">
 		<label sclass="titolperfil" value="${c:l('recoverPass.zul.Title')}"/>
 		
 		<div>
@@ -37,6 +37,7 @@
 - name: ${c:l('recoverPass.zul.Answer') }
   value: answer
   template: <input type="text" style="width: 100%; border: none" value="#{answer }" onInput="var data=this.parentElement.parentElement.data; data.value.answer=this.value; data.html=null; zkDatatable.sendClientAction(this, 'onChangeAnswer', [event.target.value])"/>
+  className: datetimeColumn
 - name: ""
   sort: false
   className: selector
