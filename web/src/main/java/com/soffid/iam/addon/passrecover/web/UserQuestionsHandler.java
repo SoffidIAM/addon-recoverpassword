@@ -34,6 +34,11 @@ public class UserQuestionsHandler extends Window implements AfterCompose {
 		Label exp3 = (Label) getFellow("exp3");
 		exp3.setValue(String.format(org.zkoss.util.resource.Labels.getLabel("recoverPass.zul.Explanation3"),
 					new Object [] {com.soffid.iam.utils.ConfigurationCache.getProperty("addon.retrieve-password.right_number")}));
+
+		Label exp4 = (Label) getFellow("exp4");
+		exp3.setValue(String.format(org.zkoss.util.resource.Labels.getLabel("recoverPass.zul.Explanation4"),
+					new Object [] {com.soffid.iam.utils.ConfigurationCache.getProperty
+							("addon.retrieve-password.fillin_number")}));
 	}
 	
 	public void close(Event event) throws CommitException {
